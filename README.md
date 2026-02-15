@@ -178,9 +178,9 @@ This application uses the [AviationStack API](https://aviationstack.com/) to fet
    ```bash
    export AVIATIONSTACK_API_KEY=your_api_key_here
    ```
-4. Or use demo mode (limited functionality):
+4. Or use demo mode for testing:
    ```bash
-   # No API key needed, but may have restrictions
+   # No API key needed - returns 5 sample flights for testing purposes
    npm start
    ```
 

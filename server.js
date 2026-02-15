@@ -100,11 +100,16 @@ function getFlightStatus(flight) {
 
 // Transform AviationStack flight data to our format
 function transformAviationStackFlight(flight, airport) {
+  // Extract country from departure airport or fallback to arrival
+  const departureAirport = flight.departure?.iata || 'Unknown';
+  const arrivalAirport = flight.arrival?.iata || 'Unknown';
+  const originInfo = `${departureAirport} → ${arrivalAirport}`;
+  
   return {
     icao24: flight.flight?.icao || 'N/A',
     callsign: flight.flight?.iata || flight.flight?.icao || 'Unknown',
     airline: flight.airline?.name || extractAirline(flight.flight?.iata),
-    originCountry: flight.departure?.timezone || flight.arrival?.timezone || 'Unknown',
+    originCountry: originInfo,
     latitude: flight.live?.latitude || 0,
     longitude: flight.live?.longitude || 0,
     altitude: flight.live?.altitude || 0,
@@ -121,6 +126,7 @@ function transformAviationStackFlight(flight, airport) {
 function generateSampleFlights(airportCode) {
   const airlines = ['SAS', 'Norwegian', 'Lufthansa', 'KLM', 'British Airways'];
   const statuses = ['Scheduled', 'In Flight', 'Arriving', 'Departing', 'Landed'];
+  const destinations = ['LHR', 'AMS', 'CDG', 'FRA', 'ARN'];
   const flights = [];
   
   for (let i = 0; i < 5; i++) {
@@ -128,7 +134,7 @@ function generateSampleFlights(airportCode) {
       icao24: `ABC${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
       callsign: `${airlines[i % airlines.length]}${Math.floor(Math.random() * 900 + 100)}`,
       airline: airlines[i % airlines.length],
-      originCountry: 'Norway',
+      originCountry: `${airportCode} → ${destinations[i % destinations.length]}`,
       latitude: 60.19 + (Math.random() - 0.5) * 0.2,
       longitude: 11.10 + (Math.random() - 0.5) * 0.2,
       altitude: Math.floor(Math.random() * 10000),
