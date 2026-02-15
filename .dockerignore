@@ -1,0 +1,34 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+DEPLOYMENT_GUIDE.md
+*.md
+
+# Build artifacts
+backend/build/
+backend/*.o
+backend/CMakeFiles/
+backend/CMakeCache.txt
+backend/cmake_install.cmake
+backend/Makefile
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker files
+docker-compose.yml
+.dockerignore
