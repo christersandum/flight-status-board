@@ -4,6 +4,37 @@ A real-time flight status board application with a C backend server and modern w
 
 **✨ Now with FREE real flight data via AviationStack API! (No credit card required)**
 
+![Flight Status Board in Browser](https://github.com/user-attachments/assets/4d5f0ccd-6fe4-47e8-ae99-149edfd8b96f)
+
+## 🚀 Quick Start - How to Use in Browser
+
+**Three simple steps to get started:**
+
+1. **Build the server:**
+   ```bash
+   make
+   ```
+
+2. **Start the server:**
+   ```bash
+   ./flight-server
+   ```
+   or
+   ```bash
+   make run
+   ```
+
+3. **Open in your browser:**
+   ```
+   http://localhost:8080
+   ```
+
+That's it! The flight status board will load in your browser showing flight departures in a beautiful airport-style display. Use the dropdown menu to select different airports.
+
+**📝 Note:** The application uses mock data by default. To get real flight data, see the [API Integration](#api-integration-free) section below.
+
+---
+
 ## Features
 
 - 🛫 **Real-time flight status** display (20 flights)
@@ -230,14 +261,36 @@ make clean
 
 ## Troubleshooting
 
+### Cannot Access http://localhost:8080
+- **Make sure the server is running**: You should see "Flight Status Board Server running on http://localhost:8080" in your terminal
+- **Check if the port is available**: Run `netstat -an | grep 8080` to see if something else is using port 8080
+- **Try a different browser**: Sometimes browser cache can cause issues; try Chrome, Firefox, or Safari
+- **Check firewall**: Ensure your firewall allows connections to localhost:8080
+
 ### Port Already in Use
-If port 8080 is already in use, change the PORT in `backend/server.c` and recompile.
+If port 8080 is already in use, change the PORT in `backend/server.c` and recompile:
+```c
+#define PORT 8080  // Change to another port like 8081
+```
 
 ### Server Won't Start
 Ensure you have proper permissions to bind to the port. On some systems, you may need to use a port above 1024.
 
+### Build Errors
+If you get compilation errors:
+- **Missing libcurl**: Install with `sudo apt-get install libcurl4-openssl-dev` (Ubuntu/Debian)
+- **Missing gcc**: Install with `sudo apt-get install build-essential`
+
 ### Flights Not Showing
-Check the browser console for errors. The application uses mock data by default, so flights should always be visible.
+- Check the browser console for errors (F12 or right-click → Inspect)
+- The application uses mock data by default, so flights should always be visible
+- Try refreshing the page (Ctrl+R or Cmd+R)
+- Check that `/api/flights` endpoint works: `curl http://localhost:8080/api/flights`
+
+### Browser Shows "Cannot Connect"
+- Verify the server is actually running: `ps aux | grep flight-server`
+- Check server output in the terminal for any error messages
+- Try stopping and restarting the server
 
 ## Future Enhancements
 
