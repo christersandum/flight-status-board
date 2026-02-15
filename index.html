@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Status Board</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✈️ Flight Status Board</h1>
+            <div class="current-time" id="currentTime"></div>
+        </header>
+
+        <div class="controls">
+            <button class="filter-btn active" data-filter="all">All Flights</button>
+            <button class="filter-btn" data-filter="departures">Departures</button>
+            <button class="filter-btn" data-filter="arrivals">Arrivals</button>
+        </div>
+
+        <div class="board">
+            <table class="flight-table">
+                <thead>
+                    <tr>
+                        <th>Flight</th>
+                        <th>Airline</th>
+                        <th>Type</th>
+                        <th>Destination/Origin</th>
+                        <th>Scheduled</th>
+                        <th>Expected</th>
+                        <th>Gate</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="flightTableBody">
+                    <!-- Flight rows will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>Live flight information • Updated every 30 seconds</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
