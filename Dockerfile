@@ -103,5 +103,8 @@ EOF
 # Expose ports (80 for nginx frontend, 8080 for backend)
 EXPOSE 80 8080
 
-# Start the backend and serve the frontend with nginx
+# Start both backend and nginx
+# Note: Using a simple shell command to run both processes
+# For production, consider using a process manager like supervisord or tini
+# The backend runs in the background (&) while nginx runs in foreground
 CMD ["sh", "-c", "/usr/bin/flight-status-backend & nginx -g 'daemon off;'"]
