@@ -1,7 +1,14 @@
 // Mock flight data generator
 const airlines = [
-    'American Airlines', 'Delta', 'United', 'Southwest', 'JetBlue',
-    'Alaska Airlines', 'Spirit', 'Frontier', 'Hawaiian Airlines'
+    { name: 'American Airlines', code: 'AA' },
+    { name: 'Delta', code: 'DL' },
+    { name: 'United', code: 'UA' },
+    { name: 'Southwest', code: 'WN' },
+    { name: 'JetBlue', code: 'B6' },
+    { name: 'Alaska Airlines', code: 'AS' },
+    { name: 'Spirit', code: 'NK' },
+    { name: 'Frontier', code: 'F9' },
+    { name: 'Hawaiian Airlines', code: 'HA' }
 ];
 
 const destinations = {
@@ -80,8 +87,9 @@ function generateFlights() {
     
     for (let i = 0; i < numFlights; i++) {
         const isDeparture = Math.random() > 0.5;
-        const airline = airlines[Math.floor(Math.random() * airlines.length)];
-        const airlineCode = airline.substring(0, 2).toUpperCase();
+        const airlineData = airlines[Math.floor(Math.random() * airlines.length)];
+        const airline = airlineData.name;
+        const airlineCode = airlineData.code;
         const flightNumber = `${airlineCode}${Math.floor(Math.random() * 9000) + 1000}`;
         
         const destinationList = destinations[currentAirport] || destinations['JFK'];
@@ -173,7 +181,7 @@ function changeAirport() {
 }
 
 // Filter flights
-function filterFlights(filter) {
+function filterFlights(filter, event) {
     currentFilter = filter;
     
     // Update active tab
