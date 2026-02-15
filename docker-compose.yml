@@ -1,1 +1,11 @@
-version: '3.8'\nservices:\n  flight-status-board:\n    image: flight-status-board:latest\n    ports:\n      - '8080:8080'\n      - '3000:3000'\n    environment:\n      BACKEND_URL: 'http://backend:8080'\n      DATABASE_URL: 'mongodb://mongo:27017/flightdb'\n    volumes:\n      - ./data:/data\n      - ./logs:/var/log/flight-status-board\n    depends_on:\n      - mongo\n  mongo:\n    image: mongo:latest\n    ports:\n      - '27017:27017'\n    volumes:\n      - ./mongo-data:/data/db\n
+version: '3.8'
+services:
+  flight-status-board:
+    build: .
+    image: flight-status-board:latest
+    ports:
+      - '8080:8080'
+    environment:
+      NODE_ENV: 'production'
+      PORT: 8080
+    restart: unless-stopped
