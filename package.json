@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
-    "axios": "^1.6.0",
+    "axios": "^1.13.5",
     "cors": "^2.8.5"
   },
   "engines": {
