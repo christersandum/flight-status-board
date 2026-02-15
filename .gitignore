@@ -19,5 +19,8 @@ Thumbs.db
 /tmp/
 *.tmp
 
+# Logs
+*.log
+
 # Configuration with sensitive data
 config.txt.local
