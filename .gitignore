@@ -33,3 +33,7 @@ tmp/
 mongo-data/
 data/
 logs/
+
+# CodeQL analysis
+_codeql_detected_source_root
+backend/_codeql_build_dir/
