@@ -1,3 +1,6 @@
+// Define _GNU_SOURCE for strdup
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,8 +49,10 @@ void send_response(int client_socket, int status_code, const char *status_text,
              "\r\n",
              status_code, status_text, content_type, strlen(body));
     
-    write(client_socket, header, strlen(header));
-    write(client_socket, body, strlen(body));
+    ssize_t header_written = write(client_socket, header, strlen(header));
+    ssize_t body_written = write(client_socket, body, strlen(body));
+    (void)header_written; // Suppress unused warning
+    (void)body_written;   // Suppress unused warning
 }
 
 // Handle API requests
