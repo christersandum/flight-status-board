@@ -1,10 +1,10 @@
 # ✈️ Flight Status Board
 
-Real-time flight status board application displaying live aviation data from the OpenSky Network API.
+Real-time flight status board application displaying live aviation data from the AviationStack API.
 
 ## 🌟 Features
 
-- **Real-time Flight Data**: Live flight information from OpenSky Network
+- **Real-time Flight Data**: Live flight information from AviationStack API
 - **Multiple Airports**: Support for Nordic airports (OSL, ARN, CPH, HEL, BGO)
 - **Country Selection**: Filter airports by country (Norway, Sweden, Denmark, Finland)
 - **Professional UI**: Terminal-style green-on-black display
@@ -13,6 +13,13 @@ Real-time flight status board application displaying live aviation data from the
 - **Real API Integration**: No mock data - all flights are real
 
 ## 🚀 Quick Start
+
+### Prerequisites
+
+**API Key:** You'll need a free AviationStack API key:
+1. Sign up at [AviationStack](https://aviationstack.com/)
+2. Get your free API key from the dashboard (500 requests/month)
+3. Set the environment variable: `AVIATIONSTACK_API_KEY=your_key_here`
 
 ### Local Development
 
@@ -23,14 +30,19 @@ Real-time flight status board application displaying live aviation data from the
    make install
    ```
 
-2. **Start the server:**
+2. **Set your API key:**
+   ```bash
+   export AVIATIONSTACK_API_KEY=your_api_key_here
+   ```
+
+3. **Start the server:**
    ```bash
    npm start
    # or
    make start
    ```
 
-3. **Open browser:**
+4. **Open browser:**
    Navigate to `http://localhost:8080`
 
 ### Docker Deployment
@@ -42,14 +54,21 @@ Real-time flight status board application displaying live aviation data from the
    make build
    ```
 
-2. **Run container:**
+2. **Run container with API key:**
    ```bash
-   docker run -p 8080:8080 flight-status-board
+   docker run -p 8080:8080 -e AVIATIONSTACK_API_KEY=your_key_here flight-status-board
    # or
    make docker-run
    ```
 
 3. **Using Docker Compose:**
+   
+   Create a `.env` file:
+   ```
+   AVIATIONSTACK_API_KEY=your_api_key_here
+   ```
+   
+   Then run:
    ```bash
    docker-compose up
    # or
@@ -63,7 +82,8 @@ This application is ready for Railway deployment:
 1. Push to GitHub
 2. Connect repository to Railway
 3. Railway will automatically detect the Dockerfile
-4. Application will be available on assigned Railway URL
+4. **Add environment variable**: Set `AVIATIONSTACK_API_KEY` in Railway dashboard
+5. Application will be available on assigned Railway URL
 
 **Note:** Railway will automatically set the PORT environment variable.
 
@@ -128,7 +148,7 @@ Response format:
 **Backend:**
 - Node.js
 - Express.js
-- Axios (for OpenSky API calls)
+- Axios (for AviationStack API calls)
 - CORS middleware
 
 **Frontend:**
@@ -141,13 +161,28 @@ Response format:
 - Docker Compose
 - Railway compatible
 
-## 🌐 OpenSky Network
+## 🌐 AviationStack API
 
-This application uses the [OpenSky Network API](https://opensky-network.org/api/) to fetch real-time aircraft position data from worldwide ADS-B receivers.
+This application uses the [AviationStack API](https://aviationstack.com/) to fetch real-time flight data globally.
 
 **Data Refresh Rate:** Every 60 seconds  
-**Coverage:** Worldwide ADS-B coverage  
-**API Limits:** Public API has rate limits; consider authentication for higher limits
+**Coverage:** Global flight tracking with real-time status  
+**Free Tier:** 500 API requests per month  
+**Features:** Flight status, departure/arrival info, airline details, live position data
+
+### API Key Setup
+
+1. Create free account at [aviationstack.com](https://aviationstack.com/)
+2. Copy your API key from the dashboard
+3. Set environment variable:
+   ```bash
+   export AVIATIONSTACK_API_KEY=your_api_key_here
+   ```
+4. Or use demo mode (limited functionality):
+   ```bash
+   # No API key needed, but may have restrictions
+   npm start
+   ```
 
 ## 📋 Supported Airports
 
@@ -182,6 +217,7 @@ flight-status-board/
 
 - `PORT` - Server port (default: 8080)
 - `NODE_ENV` - Environment mode (production/development)
+- `AVIATIONSTACK_API_KEY` - Your AviationStack API key (required for production)
 
 ## 🧪 Testing
 
@@ -216,18 +252,24 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 🐛 Troubleshooting
 
 **No flights showing:**
-- Check if OpenSky API is accessible
+- Check if AviationStack API key is set correctly
+- Verify API key has available requests (check dashboard)
 - Try different airport/time of day
-- Verify bounding box coordinates are correct
+- Check console logs for API errors
 
 **API timeout:**
-- OpenSky API may be slow or rate-limited
+- AviationStack API may be slow or rate-limited
+- Check if you've exceeded free tier limit (500 requests/month)
 - Wait a few minutes and retry
-- Consider implementing caching
 
 **Port already in use:**
 - Change PORT environment variable
 - Kill process using port 8080
+
+**Invalid API Key:**
+- Verify `AVIATIONSTACK_API_KEY` is set correctly
+- Check key at [aviationstack.com/dashboard](https://aviationstack.com/dashboard)
+- Ensure no extra spaces or quotes in the key
 
 ## 📞 Support
 

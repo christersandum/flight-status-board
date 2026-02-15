@@ -1,7 +1,7 @@
 {
   "name": "flight-status-board",
   "version": "1.0.0",
-  "description": "Real-time flight status board with OpenSky API integration",
+  "description": "Real-time flight status board with AviationStack API integration",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,7 +11,7 @@
     "flight",
     "status",
     "aviation",
-    "opensky",
+    "aviationstack",
     "real-time"
   ],
   "author": "",
