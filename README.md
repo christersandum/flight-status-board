@@ -2,9 +2,12 @@
 
 A real-time flight status board application with a C backend server and modern web frontend. Displays flight information in an airport-style interface with automatic updates.
 
+**✨ Now with FREE real flight data via AviationStack API! (No credit card required)**
+
 ## Features
 
-- 🛫 Real-time flight status display (20 flights)
+- 🛫 **Real-time flight status** display (20 flights)
+- 🆓 **FREE API integration** - Get actual flight data from AviationStack (500-1000 requests/month free)
 - 🌍 Multiple airport selection
 - ⏰ Auto-refresh every 30 seconds
 - 📊 Flight information includes:
