@@ -1,3 +1,7 @@
+// Application constants
+const AUTO_REFRESH_INTERVAL_MS = 60000; // 60 seconds
+const MAX_FLIGHTS_DISPLAY = 20; // Maximum flights to show
+
 // Application state
 const state = {
     countries: [],
@@ -77,7 +81,7 @@ function renderFlights(flights) {
     }
 
     elements.flightsContainer.innerHTML = flights
-        .slice(0, 20)  // Limit to 20 flights
+        .slice(0, MAX_FLIGHTS_DISPLAY)  // Limit to configured max flights
         .map(flight => createFlightCard(flight))
         .join('');
 }
@@ -189,12 +193,12 @@ function setupAutoRefresh() {
         clearInterval(state.autoRefreshInterval);
     }
     
-    // Refresh every 60 seconds
+    // Refresh every configured interval
     state.autoRefreshInterval = setInterval(() => {
         if (state.selectedAirport) {
             loadFlights(state.selectedAirport);
         }
-    }, 60000);
+    }, AUTO_REFRESH_INTERVAL_MS);
 }
 
 // Event listeners

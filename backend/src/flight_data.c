@@ -50,20 +50,23 @@ char* get_countries_json() {
     char *json = malloc(buffer_size);
     if (!json) return NULL;
 
-    strcpy(json, "[");
+    size_t pos = 0;
+    pos += snprintf(json + pos, buffer_size - pos, "[");
     
     size_t count = sizeof(countries) / sizeof(countries[0]);
     for (size_t i = 0; i < count; i++) {
-        char entry[256];
-        snprintf(entry, sizeof(entry),
+        if (pos >= buffer_size - 256) break; // Safety check
+        
+        pos += snprintf(json + pos, buffer_size - pos,
                  "%s{\"code\":\"%s\",\"name\":\"%s\"}",
                  i > 0 ? "," : "",
                  countries[i].code,
                  countries[i].name);
-        strcat(json, entry);
     }
     
-    strcat(json, "]");
+    if (pos < buffer_size - 2) {
+        snprintf(json + pos, buffer_size - pos, "]");
+    }
     return json;
 }
 
@@ -73,36 +76,42 @@ char* get_airports_json(const char *country_code) {
     char *json = malloc(buffer_size);
     if (!json) return NULL;
 
-    strcpy(json, "[");
+    size_t pos = 0;
+    pos += snprintf(json + pos, buffer_size - pos, "[");
     int first = 1;
     
     size_t count = sizeof(airports) / sizeof(airports[0]);
     for (size_t i = 0; i < count; i++) {
         if (strcmp(airports[i].country, country_code) == 0) {
-            char entry[512];
-            snprintf(entry, sizeof(entry),
+            if (pos >= buffer_size - 512) break; // Safety check
+            
+            pos += snprintf(json + pos, buffer_size - pos,
                      "%s{\"icao\":\"%s\",\"iata\":\"%s\",\"name\":\"%s\",\"city\":\"%s\"}",
                      first ? "" : ",",
                      airports[i].icao,
                      airports[i].iata,
                      airports[i].name,
                      airports[i].city);
-            strcat(json, entry);
             first = 0;
         }
     }
     
-    strcat(json, "]");
+    if (pos < buffer_size - 2) {
+        snprintf(json + pos, buffer_size - pos, "]");
+    }
     return json;
 }
 
 // Generate mock flight data for demonstration (since OpenSky API might not have all data)
 char* generate_mock_flights(const char *airport_code) {
+    (void)airport_code; // Mark as intentionally unused
+    
     size_t buffer_size = 32768;
     char *json = malloc(buffer_size);
     if (!json) return NULL;
 
-    strcpy(json, "[");
+    size_t pos = 0;
+    pos += snprintf(json + pos, buffer_size - pos, "[");
     
     // Generate 20 mock flights
     const char* airlines[] = {"SAS", "Norwegian", "KLM", "Lufthansa", "British Airways", 
@@ -113,7 +122,8 @@ char* generate_mock_flights(const char *airport_code) {
     const char* statuses[] = {"On Time", "Delayed", "Boarding", "Departed", "Cancelled"};
     
     for (int i = 0; i < 20; i++) {
-        char entry[1024];
+        if (pos >= buffer_size - 1024) break; // Safety check
+        
         time_t now = time(NULL);
         struct tm *t = localtime(&now);
         
@@ -124,9 +134,16 @@ char* generate_mock_flights(const char *airport_code) {
         int airline_idx = i % 10;
         int dest_idx = i % 10;
         int term_idx = i % 5;
-        int status_idx = (i % 5 == 4) ? 1 : (i % 10 == 9 ? 4 : 0); // Occasional delays/cancellations
         
-        snprintf(entry, sizeof(entry),
+        // Determine status with readable logic
+        const char* status = statuses[0]; // Default: On Time
+        if (i % 5 == 4) {
+            status = statuses[1]; // Delayed
+        } else if (i % 10 == 9) {
+            status = statuses[4]; // Cancelled
+        }
+        
+        pos += snprintf(json + pos, buffer_size - pos,
                  "%s{\"departure_time\":\"%02d:%02d\","
                  "\"flight_number\":\"%s%d\","
                  "\"airline\":\"%s\","
@@ -141,16 +158,18 @@ char* generate_mock_flights(const char *airport_code) {
                  destinations[dest_idx],
                  terminals[term_idx],
                  'A' + (i % 4), 1 + (i % 20),
-                 statuses[status_idx]);
-        strcat(json, entry);
+                 status);
     }
     
-    strcat(json, "]");
+    if (pos < buffer_size - 2) {
+        snprintf(json + pos, buffer_size - pos, "]");
+    }
     return json;
 }
 
 // Process flight data from API response
 char* process_flight_data(const char *raw_data, const char *airport_code) {
+    (void)raw_data; // Mark as intentionally unused - will parse when implementing full API support
     // For now, generate mock data as OpenSky API format is complex
     // In production, you would parse the JSON response here
     return generate_mock_flights(airport_code);

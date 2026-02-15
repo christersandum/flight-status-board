@@ -29,7 +29,7 @@ char* get_query_param(const char *url, const char *param_name) {
     char *result = malloc(len + 1);
     if (result) {
         strncpy(result, param_start, len);
-        result[len] = '\0';
+        result[len] = '\0'; // Ensure null termination after strncpy
     }
     return result;
 }
