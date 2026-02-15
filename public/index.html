@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Status Board</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✈️ Flight Departures</h1>
+            <div class="airport-selector">
+                <label for="airport">Airport:</label>
+                <select id="airport" onchange="changeAirport()">
+                    <option value="JFK">New York JFK</option>
+                    <option value="LAX">Los Angeles LAX</option>
+                    <option value="ORD">Chicago O'Hare</option>
+                    <option value="LHR">London Heathrow</option>
+                    <option value="CDG">Paris Charles de Gaulle</option>
+                    <option value="FRA">Frankfurt</option>
+                    <option value="AMS">Amsterdam Schiphol</option>
+                    <option value="DXB">Dubai International</option>
+                    <option value="SIN">Singapore Changi</option>
+                    <option value="HKG">Hong Kong International</option>
+                </select>
+                <div class="refresh-indicator" id="refreshIndicator">
+                    <span>Auto-refresh: <span id="countdown">30</span>s</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="board">
+            <div class="board-header">
+                <div class="col-time">Time</div>
+                <div class="col-flight">Flight</div>
+                <div class="col-airline">Airline</div>
+                <div class="col-destination">Destination</div>
+                <div class="col-terminal">Terminal</div>
+                <div class="col-gate">Gate</div>
+                <div class="col-status">Status</div>
+            </div>
+            <div id="flightList" class="flight-list">
+                <div class="loading">Loading flight data...</div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Last updated: <span id="lastUpdate">Never</span></p>
+        </footer>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

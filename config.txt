@@ -1,0 +1,11 @@
+# Flight Status Board Configuration
+# 
+# To use a real flight API, add your API key here:
+# API_KEY=your_api_key_here
+#
+# The application will use mock data if no API key is provided.
+# 
+# Supported APIs:
+# - AviationStack (https://aviationstack.com/)
+# - FlightAware (https://flightaware.com/commercial/flightxml/)
+# - Aviation Edge (https://aviation-edge.com/)
