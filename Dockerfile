@@ -17,9 +17,8 @@ FROM nginx:alpine
 # Copy the compiled backend from the build stage
 COPY --from=build /app/flight-status-backend /usr/bin/flight-status-backend
 
-# Create a default frontend page
-RUN mkdir -p /usr/share/nginx/html && \
-    echo '<html><body><h1>Flight Status Board</h1><p>Backend running on port 8080</p></body></html>' > /usr/share/nginx/html/index.html
+# Copy the frontend files
+COPY frontend/ /usr/share/nginx/html/
 
 # Expose ports
 EXPOSE 80
