@@ -292,7 +292,7 @@ To use a domain name instead of an IP address:
      TTL: 3600
      ```
 
-3. **Wait for DNS propagation** (typically 5-30 minutes for most major DNS resolvers, though complete global propagation can take up to 24-48 hours in some cases)
+3. **Wait for DNS propagation** (typically 5-30 minutes locally, up to 24-48 hours globally)
 
 4. **Test your domain**:
    ```bash
