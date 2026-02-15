@@ -26,41 +26,59 @@ function getStatusClass(status) {
 
 // Render flight data
 function renderFlights(flights) {
-    const flightList = document.getElementById('flightList');
+    const flightListLeft = document.getElementById('flightListLeft');
+    const flightListRight = document.getElementById('flightListRight');
     
     if (!flights || flights.length === 0) {
-        flightList.innerHTML = '<div class="loading">No flights available</div>';
+        flightListLeft.innerHTML = '<div class="loading">No flights available</div>';
+        flightListRight.innerHTML = '';
         return;
     }
     
-    let html = '';
+    // Split flights into two columns: first 10 and last 10
+    const leftFlights = flights.slice(0, 10);
+    const rightFlights = flights.slice(10, 20);
     
-    flights.forEach(flight => {
-        const statusClass = getStatusClass(flight.status);
-        const time = formatTime(flight.scheduled_time);
-        const estimatedTime = flight.estimated_time ? formatTime(flight.estimated_time) : time;
-        
-        html += `
-            <div class="flight-row">
-                <div class="col-time">
-                    ${time}
-                    ${flight.delay_minutes > 0 ? `<div class="delay-info">Est: ${estimatedTime}</div>` : ''}
-                </div>
-                <div class="col-flight">${flight.flight_number}</div>
-                <div class="col-airline">${flight.airline}</div>
-                <div class="col-destination">${flight.destination}</div>
-                <div class="col-terminal">${flight.terminal || '-'}</div>
-                <div class="col-gate">${flight.gate || '-'}</div>
-                <div class="col-status ${statusClass}">
-                    ${flight.status}
-                    ${flight.delay_minutes > 0 ? `<div class="delay-info">+${flight.delay_minutes} min</div>` : ''}
-                </div>
-            </div>
-        `;
+    // Render left column
+    let htmlLeft = '';
+    leftFlights.forEach(flight => {
+        htmlLeft += renderFlightRow(flight);
     });
+    flightListLeft.innerHTML = htmlLeft;
     
-    flightList.innerHTML = html;
+    // Render right column
+    let htmlRight = '';
+    rightFlights.forEach(flight => {
+        htmlRight += renderFlightRow(flight);
+    });
+    flightListRight.innerHTML = htmlRight || '<div class="loading">No more flights</div>';
+    
     updateLastUpdateTime();
+}
+
+// Helper function to render a single flight row
+function renderFlightRow(flight) {
+    const statusClass = getStatusClass(flight.status);
+    const time = formatTime(flight.scheduled_time);
+    const estimatedTime = flight.estimated_time ? formatTime(flight.estimated_time) : time;
+    
+    return `
+        <div class="flight-row">
+            <div class="col-time">
+                ${time}
+                ${flight.delay_minutes > 0 ? `<div class="delay-info">Est: ${estimatedTime}</div>` : ''}
+            </div>
+            <div class="col-flight">${flight.flight_number}</div>
+            <div class="col-airline">${flight.airline}</div>
+            <div class="col-destination">${flight.destination}</div>
+            <div class="col-terminal">${flight.terminal || '-'}</div>
+            <div class="col-gate">${flight.gate || '-'}</div>
+            <div class="col-status ${statusClass}">
+                ${flight.status}
+                ${flight.delay_minutes > 0 ? `<div class="delay-info">+${flight.delay_minutes} min</div>` : ''}
+            </div>
+        </div>
+    `;
 }
 
 // Fetch flight data from API
@@ -74,8 +92,9 @@ async function fetchFlights() {
         renderFlights(flights);
     } catch (error) {
         console.error('Error fetching flights:', error);
-        document.getElementById('flightList').innerHTML = 
+        document.getElementById('flightListLeft').innerHTML = 
             '<div class="loading">Error loading flight data. Please try again.</div>';
+        document.getElementById('flightListRight').innerHTML = '';
     }
 }
 
