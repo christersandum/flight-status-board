@@ -1,3 +1,13 @@
+/*
+ * Flight Status Board - HTTP Server
+ * 
+ * A simple single-threaded HTTP server for serving flight status data.
+ * 
+ * NOTE: This implementation uses static buffers for simplicity and is designed
+ * for single-threaded operation. For multi-threaded/production use, replace 
+ * static buffers with thread-local storage or dynamically allocated memory.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,28 +37,8 @@ typedef struct {
     int delay_minutes;
 } Flight;
 
-// Function to URL encode a string
-char* url_encode(const char* str) {
-    static char encoded[256];
-    const char *hex = "0123456789ABCDEF";
-    int pos = 0;
-    
-    for (int i = 0; str[i] != '\0' && pos < 254; i++) {
-        if (isalnum(str[i]) || str[i] == '-' || str[i] == '_' || str[i] == '.' || str[i] == '~') {
-            encoded[pos++] = str[i];
-        } else if (str[i] == ' ') {
-            encoded[pos++] = '+';
-        } else {
-            encoded[pos++] = '%';
-            encoded[pos++] = hex[(unsigned char)str[i] >> 4];
-            encoded[pos++] = hex[(unsigned char)str[i] & 15];
-        }
-    }
-    encoded[pos] = '\0';
-    return encoded;
-}
-
 // Function to make HTTP request to flight API
+// NOTE: Uses static buffer - safe for single-threaded operation only
 char* fetch_flight_data(const char* airport_code) {
     int sockfd;
     struct sockaddr_in serv_addr;
@@ -149,6 +139,13 @@ void serve_file(int client_socket, const char* filepath) {
     fseek(file, 0, SEEK_SET);
     
     char *file_content = malloc(file_size + 1);
+    if (!file_content) {
+        fclose(file);
+        const char* body = "{\"error\":\"Memory allocation failed\"}";
+        send_response(client_socket, "500 Internal Server Error", "application/json", body);
+        return;
+    }
+    
     fread(file_content, 1, file_size, file);
     file_content[file_size] = '\0';
     fclose(file);
