@@ -80,8 +80,7 @@ cd /opt/flight-status-board
 # Clone the repository
 sudo -u flightboard git clone https://github.com/christersandum/flight-status-board.git .
 
-# Install dependencies and build
-sudo apt install -y gcc make libcurl4-openssl-dev
+# Build the application
 sudo -u flightboard make
 ```
 
@@ -274,6 +273,8 @@ To use a domain name instead of an IP address:
    - [Namecheap](https://www.namecheap.com/)
    - [Porkbun](https://porkbun.com/)
    - [Cloudflare Registrar](https://www.cloudflare.com/products/registrar/)
+   
+   **Note:** Google Domains was discontinued in 2023 and migrated to Squarespace. If you're familiar with Google Domains, Squarespace is now the successor service.
 
 2. **Configure DNS records** in your domain registrar:
    - Add an **A record** pointing to your server's IP address:
@@ -291,7 +292,7 @@ To use a domain name instead of an IP address:
      TTL: 3600
      ```
 
-3. **Wait for DNS propagation** (typically 5-60 minutes, though may take up to 24 hours in rare cases)
+3. **Wait for DNS propagation** (typically 5-30 minutes for most providers, though may take longer in rare cases)
 
 4. **Test your domain**:
    ```bash
