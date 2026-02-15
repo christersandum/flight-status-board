@@ -1,6 +1,6 @@
 # Multi-stage build for Flight Status Board
 # Stage 1: Build the C backend using CMake
-FROM gcc:latest as build
+FROM gcc:latest AS build
 
 # Install CMake and other build dependencies
 RUN apt-get update && apt-get install -y cmake && rm -rf /var/lib/apt/lists/*
