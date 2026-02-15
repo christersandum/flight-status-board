@@ -146,7 +146,15 @@ void serve_file(int client_socket, const char* filepath) {
         return;
     }
     
-    fread(file_content, 1, file_size, file);
+    size_t bytes_read = fread(file_content, 1, file_size, file);
+    if (bytes_read != (size_t)file_size) {
+        fclose(file);
+        free(file_content);
+        const char* body = "{\"error\":\"Failed to read file\"}";
+        send_response(client_socket, "500 Internal Server Error", "application/json", body);
+        return;
+    }
+    
     file_content[file_size] = '\0';
     fclose(file);
     
@@ -206,9 +214,15 @@ void handle_request(int client_socket) {
         serve_file(client_socket, "public/index.html");
     }
     else if (strncmp(path, "/", 1) == 0) {
-        char filepath[512];
-        snprintf(filepath, sizeof(filepath), "public%s", path);
-        serve_file(client_socket, filepath);
+        // Validate path to prevent directory traversal
+        if (strstr(path, "..") != NULL) {
+            const char* body = "{\"error\":\"Invalid path\"}";
+            send_response(client_socket, "400 Bad Request", "application/json", body);
+        } else {
+            char filepath[512];
+            snprintf(filepath, sizeof(filepath), "public%s", path);
+            serve_file(client_socket, filepath);
+        }
     }
     else {
         const char* body = "{\"error\":\"Not found\"}";
@@ -232,7 +246,10 @@ int main() {
     
     // Set socket options
     int opt = 1;
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        perror("Warning: Failed to set SO_REUSEADDR");
+        // Continue anyway - not fatal
+    }
     
     // Bind socket
     server_addr.sin_family = AF_INET;
