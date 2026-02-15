@@ -16,6 +16,8 @@ WORKDIR /app/backend
 RUN cmake . && make
 
 # Stage 2: Create the runtime image with nginx
+# Using nginx:stable (Debian-based) instead of nginx:alpine for glibc compatibility
+# The C backend binary compiled on gcc:latest requires glibc, which is not available on Alpine (musl libc)
 FROM nginx:stable
 
 # Copy the compiled backend from the build stage
