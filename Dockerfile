@@ -1,27 +1,17 @@
-# Use an official C compiler as a parent image
-FROM gcc:latest as build
+# Use an official GCC compiler as base image
+FROM gcc:latest
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the source code to the working directory
-COPY ./src /app/src
+# Copy the backend source code with correct path
+COPY backend/src/main.c /app/main.c
 
 # Compile the C backend
-RUN gcc -o flight-status-backend /app/src/backend.c
+RUN gcc -o flight-status-backend /app/main.c
 
+# Expose the port that the backend listens on
+EXPOSE 8080
 
-# Use a lightweight web server for the frontend
-FROM nginx:alpine
-
-# Copy the compiled backend from the build stage
-COPY --from=build /app/flight-status-backend /usr/bin/flight-status-backend
-
-# Copy the frontend files
-COPY ./frontend /usr/share/nginx/html
-
-# Expose ports
-EXPOSE 80
-
-# Start the backend and serve the frontend
-CMD ["sh", "-c", "/usr/bin/flight-status-backend & nginx -g 'daemon off;' "]
+# Run the backend server
+CMD ["/app/flight-status-backend"]
