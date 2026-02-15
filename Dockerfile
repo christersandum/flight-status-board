@@ -5,10 +5,10 @@ FROM gcc:latest as build
 WORKDIR /app
 
 # Copy the source code to the working directory
-COPY ./src /app/src
+COPY backend/src /app/src
 
 # Compile the C backend
-RUN gcc -o flight-status-backend /app/src/backend.c
+RUN gcc -o flight-status-backend /app/src/main.c
 
 
 # Use a lightweight web server for the frontend
@@ -18,7 +18,7 @@ FROM nginx:alpine
 COPY --from=build /app/flight-status-backend /usr/bin/flight-status-backend
 
 # Copy the frontend files
-COPY ./frontend /usr/share/nginx/html
+COPY frontend/ /usr/share/nginx/html/
 
 # Expose ports
 EXPOSE 80
