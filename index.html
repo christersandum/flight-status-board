@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Status Board</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✈️ FLIGHT STATUS BOARD</h1>
+            <div class="airport-selector">
+                <label for="airport">SELECT AIRPORT:</label>
+                <select id="airport">
+                    <option value="KJFK">KJFK - John F. Kennedy International</option>
+                    <option value="KLAX">KLAX - Los Angeles International</option>
+                    <option value="KORD">KORD - Chicago O'Hare International</option>
+                    <option value="KDFW">KDFW - Dallas/Fort Worth International</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="board">
+            <table id="flightTable">
+                <thead>
+                    <tr>
+                        <th>FLIGHT</th>
+                        <th>AIRLINE</th>
+                        <th>DESTINATION</th>
+                        <th>TIME</th>
+                        <th>TERMINAL</th>
+                        <th>GATE</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody id="flightTableBody">
+                    <!-- Flight data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <span id="lastUpdate">Last Updated: Loading...</span>
+                <span class="refresh-indicator">⟳ Auto-refresh: 60s</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

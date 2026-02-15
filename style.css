@@ -1,0 +1,230 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #0a0a0a;
+    color: #00ff00;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    width: 100%;
+}
+
+header {
+    text-align: center;
+    padding: 30px 20px;
+    border: 2px solid #00ff00;
+    border-radius: 8px;
+    background-color: #1a1a1a;
+    margin-bottom: 30px;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+header h1 {
+    font-size: 2.5em;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+}
+
+.airport-selector {
+    margin-top: 20px;
+}
+
+.airport-selector label {
+    font-size: 1.1em;
+    margin-right: 15px;
+    font-weight: bold;
+}
+
+.airport-selector select {
+    background-color: #0a0a0a;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-family: 'Courier New', Courier, monospace;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+.airport-selector select:hover {
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+.airport-selector select:focus {
+    outline: none;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+}
+
+.board {
+    border: 2px solid #00ff00;
+    border-radius: 8px;
+    background-color: #1a1a1a;
+    padding: 20px;
+    margin-bottom: 30px;
+    overflow-x: auto;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    border-bottom: 3px solid #00ff00;
+}
+
+th {
+    padding: 15px;
+    text-align: left;
+    font-size: 1.1em;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+}
+
+tbody tr {
+    border-bottom: 1px solid #00ff00;
+    transition: background-color 0.3s ease;
+}
+
+tbody tr:hover {
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+td {
+    padding: 15px;
+    font-size: 1em;
+}
+
+.status {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+}
+
+.status-on-time {
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    background-color: rgba(0, 255, 0, 0.1);
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
+}
+
+.status-delayed {
+    color: #ffff00;
+    border: 1px solid #ffff00;
+    background-color: rgba(255, 255, 0, 0.1);
+    text-shadow: 0 0 5px rgba(255, 255, 0, 0.8);
+}
+
+.status-cancelled {
+    color: #ff0000;
+    border: 1px solid #ff0000;
+    background-color: rgba(255, 0, 0, 0.1);
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+}
+
+.status-boarding {
+    color: #00ffff;
+    border: 1px solid #00ffff;
+    background-color: rgba(0, 255, 255, 0.1);
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.8);
+}
+
+footer {
+    border: 2px solid #00ff00;
+    border-radius: 8px;
+    background-color: #1a1a1a;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-content span {
+    font-size: 1em;
+}
+
+.refresh-indicator {
+    color: #00ff00;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.8em;
+        letter-spacing: 2px;
+    }
+
+    .airport-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .airport-selector select {
+        width: 100%;
+    }
+
+    th, td {
+        padding: 10px 5px;
+        font-size: 0.9em;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .status {
+        min-width: 80px;
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5em;
+    }
+
+    th, td {
+        padding: 8px 3px;
+        font-size: 0.8em;
+    }
+
+    th {
+        letter-spacing: 1px;
+    }
+}
