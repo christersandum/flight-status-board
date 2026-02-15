@@ -1,0 +1,26 @@
+# Build artifacts
+flight-server
+*.o
+*.out
+*.exe
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+/tmp/
+*.tmp
+
+# Logs
+*.log
+
+# Configuration with sensitive data
+config.txt.local
