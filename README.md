@@ -291,7 +291,7 @@ To use a domain name instead of an IP address:
      TTL: 3600
      ```
 
-3. **Wait for DNS propagation** (5 minutes to 48 hours, usually ~1 hour)
+3. **Wait for DNS propagation** (typically 5-60 minutes, though may take up to 24 hours in rare cases)
 
 4. **Test your domain**:
    ```bash
@@ -341,10 +341,10 @@ sudo journalctl -u flight-status-board -n 100
 cd /opt/flight-status-board
 
 # Pull latest changes
-git pull
+sudo -u flightboard git pull
 
-# Rebuild
-make clean && make
+# Rebuild as the flightboard user
+sudo -u flightboard make clean && sudo -u flightboard make
 
 # Restart service
 sudo systemctl restart flight-status-board
