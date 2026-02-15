@@ -157,7 +157,7 @@ class FlightStatusBoard {
                     <span class="detail-value">${this.escapeHtml(flight.icao24)}</span>
                 </div>
                 <div class="flight-detail">
-                    <span class="detail-label">Country:</span>
+                    <span class="detail-label">Route:</span>
                     <span class="detail-value">${this.escapeHtml(flight.originCountry)}</span>
                 </div>
                 <div class="flight-detail">

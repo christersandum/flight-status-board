@@ -5,6 +5,7 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+const AVIATIONSTACK_API_KEY = process.env.AVIATIONSTACK_API_KEY || 'demo';
 
 // Enable CORS
 app.use(cors());
@@ -64,10 +65,10 @@ const COUNTRIES = [
   { code: 'FI', name: 'Finland', airports: ['HEL'] }
 ];
 
-// OpenSky API base URL
-const OPENSKY_API = 'https://opensky-network.org/api/states/all';
+// AviationStack API base URL
+const AVIATIONSTACK_API = 'https://api.aviationstack.com/v1/flights';
 
-// Extract airline code from callsign
+// Extract airline code from callsign or flight number
 function extractAirline(callsign) {
   if (!callsign) return 'Unknown';
   const clean = callsign.trim();
@@ -76,12 +77,77 @@ function extractAirline(callsign) {
   return match ? match[1] : clean.substring(0, 3);
 }
 
-// Get flight status based on altitude and vertical rate
-function getFlightStatus(altitude, verticalRate) {
-  if (!altitude || altitude < 100) return 'On Ground';
-  if (verticalRate > 1) return 'Departing';
-  if (verticalRate < -1) return 'Arriving';
-  return 'In Flight';
+// Get flight status based on flight data
+function getFlightStatus(flight) {
+  if (!flight) return 'Unknown';
+  
+  // Check flight status from API
+  if (flight.flight_status) {
+    const status = flight.flight_status.toLowerCase();
+    if (status === 'scheduled') return 'Scheduled';
+    if (status === 'active') return 'In Flight';
+    if (status === 'landed') return 'Landed';
+    if (status === 'cancelled') return 'Cancelled';
+    if (status === 'diverted') return 'Diverted';
+  }
+  
+  // Fallback to departure/arrival status
+  if (flight.departure && flight.departure.actual) return 'Departing';
+  if (flight.arrival && flight.arrival.estimated) return 'Arriving';
+  
+  return 'Scheduled';
+}
+
+// Transform AviationStack flight data to our format
+function transformAviationStackFlight(flight, airport) {
+  // Extract country from departure airport or fallback to arrival
+  const departureAirport = flight.departure?.iata || 'Unknown';
+  const arrivalAirport = flight.arrival?.iata || 'Unknown';
+  const originInfo = `${departureAirport} → ${arrivalAirport}`;
+  
+  return {
+    icao24: flight.flight?.icao || 'N/A',
+    callsign: flight.flight?.iata || flight.flight?.icao || 'Unknown',
+    airline: flight.airline?.name || extractAirline(flight.flight?.iata),
+    originCountry: originInfo,
+    latitude: flight.live?.latitude || 0,
+    longitude: flight.live?.longitude || 0,
+    altitude: flight.live?.altitude || 0,
+    onGround: flight.live?.is_ground || false,
+    velocity: Math.round(flight.live?.speed_horizontal || 0),
+    heading: flight.live?.direction || 0,
+    verticalRate: flight.live?.speed_vertical || 0,
+    status: getFlightStatus(flight),
+    lastContact: flight.live?.updated || flight.flight_date || new Date().toISOString()
+  };
+}
+
+// Generate sample flights for demo mode
+function generateSampleFlights(airportCode) {
+  const airlines = ['SAS', 'Norwegian', 'Lufthansa', 'KLM', 'British Airways'];
+  const statuses = ['Scheduled', 'In Flight', 'Arriving', 'Departing', 'Landed'];
+  const destinations = ['LHR', 'AMS', 'CDG', 'FRA', 'ARN'];
+  const flights = [];
+  
+  for (let i = 0; i < 5; i++) {
+    flights.push({
+      icao24: `ABC${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+      callsign: `${airlines[i % airlines.length]}${Math.floor(Math.random() * 900 + 100)}`,
+      airline: airlines[i % airlines.length],
+      originCountry: `${airportCode} → ${destinations[i % destinations.length]}`,
+      latitude: 60.19 + (Math.random() - 0.5) * 0.2,
+      longitude: 11.10 + (Math.random() - 0.5) * 0.2,
+      altitude: Math.floor(Math.random() * 10000),
+      onGround: false,
+      velocity: Math.floor(Math.random() * 500 + 200),
+      heading: Math.floor(Math.random() * 360),
+      verticalRate: (Math.random() - 0.5) * 10,
+      status: statuses[i % statuses.length],
+      lastContact: new Date().toISOString()
+    });
+  }
+  
+  return flights;
 }
 
 // Health check endpoint
@@ -122,49 +188,71 @@ app.get('/api/flights', async (req, res) => {
       });
     }
 
-    // Call OpenSky API with bounding box
-    const { lamin, lomin, lamax, lomax } = airport.bbox;
-    const url = `${OPENSKY_API}?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
+    // If using demo key, return sample data
+    if (AVIATIONSTACK_API_KEY === 'demo') {
+      console.log(`Demo mode: Returning sample flights for ${airportCode}`);
+      return res.json({
+        airport: airport,
+        flights: generateSampleFlights(airportCode),
+        count: 5,
+        timestamp: new Date().toISOString(),
+        message: 'Demo mode - sample flight data (set AVIATIONSTACK_API_KEY for real data)'
+      });
+    }
+
+    // Call AviationStack API
+    const url = `${AVIATIONSTACK_API}`;
+    const params = {
+      access_key: AVIATIONSTACK_API_KEY,
+      dep_iata: airportCode,
+      limit: 20
+    };
     
-    console.log(`Fetching flights for ${airportCode} from OpenSky API...`);
+    console.log(`Fetching flights for ${airportCode} from AviationStack API...`);
     const response = await axios.get(url, {
+      params: params,
       timeout: 10000,
       headers: {
         'User-Agent': 'FlightStatusBoard/1.0'
       }
     });
 
-    if (!response.data || !response.data.states) {
-      return res.json({ 
+    if (!response.data || !response.data.data) {
+      // Try arrival flights if no departure flights
+      params.arr_iata = airportCode;
+      delete params.dep_iata;
+      
+      const arrivalResponse = await axios.get(url, {
+        params: params,
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'FlightStatusBoard/1.0'
+        }
+      });
+      
+      if (!arrivalResponse.data || !arrivalResponse.data.data || arrivalResponse.data.data.length === 0) {
+        return res.json({ 
+          airport: airport,
+          flights: [],
+          count: 0,
+          timestamp: new Date().toISOString(),
+          message: 'No flights detected for this airport'
+        });
+      }
+      
+      // Process arrival flights
+      const flights = arrivalResponse.data.data.map(flight => transformAviationStackFlight(flight, airport));
+      
+      return res.json({
         airport: airport,
-        flights: [],
-        timestamp: new Date().toISOString(),
-        message: 'No flights detected in area'
+        flights: flights,
+        count: flights.length,
+        timestamp: new Date().toISOString()
       });
     }
 
-    // Process OpenSky data
-    // Format: [icao24, callsign, origin_country, time_position, last_contact, 
-    //          longitude, latitude, baro_altitude, on_ground, velocity, 
-    //          true_track, vertical_rate, sensors, geo_altitude, squawk, spi, position_source]
-    const flights = response.data.states
-      .filter(state => state[1] && state[1].trim()) // Has callsign
-      .slice(0, 20) // Limit to 20 flights
-      .map(state => ({
-        icao24: state[0],
-        callsign: state[1] ? state[1].trim() : 'Unknown',
-        airline: extractAirline(state[1]),
-        originCountry: state[2],
-        latitude: state[6],
-        longitude: state[5],
-        altitude: state[7] ? Math.round(state[7]) : 0,
-        onGround: state[8],
-        velocity: state[9] ? Math.round(state[9] * 3.6) : 0, // Convert m/s to km/h
-        heading: state[10] ? Math.round(state[10]) : 0,
-        verticalRate: state[11] ? parseFloat(state[11].toFixed(1)) : 0,
-        status: getFlightStatus(state[7], state[11]),
-        lastContact: state[4] ? new Date(state[4] * 1000).toISOString() : new Date().toISOString()
-      }));
+    // Process departure flights
+    const flights = response.data.data.map(flight => transformAviationStackFlight(flight, airport));
 
     res.json({
       airport: airport,
@@ -178,15 +266,17 @@ app.get('/api/flights', async (req, res) => {
     
     if (error.code === 'ECONNABORTED') {
       return res.status(504).json({ 
-        error: 'OpenSky API timeout',
+        error: 'AviationStack API timeout',
         message: 'The flight data service is taking too long to respond'
       });
     }
     
     if (error.response) {
+      console.error('API Response Error:', error.response.data);
       return res.status(error.response.status).json({ 
-        error: 'OpenSky API error',
-        message: error.response.data || 'Failed to fetch flight data'
+        error: 'AviationStack API error',
+        message: error.response.data?.error?.message || 'Failed to fetch flight data',
+        details: error.response.data
       });
     }
     
@@ -201,5 +291,6 @@ app.get('/api/flights', async (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Flight Status Board server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`API: AviationStack (${AVIATIONSTACK_API_KEY === 'demo' ? 'demo mode' : 'API key configured'})`);
   console.log(`Access the application at http://localhost:${PORT}`);
 });
