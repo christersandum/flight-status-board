@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Status Board - Live Aviation Data</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">✈️ FLIGHT STATUS BOARD</h1>
+            <div class="subtitle">LIVE AVIATION DATA FROM OPENSKY NETWORK</div>
+        </header>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="country-select">Country:</label>
+                <select id="country-select" class="select">
+                    <option value="NO">🇳🇴 Norway</option>
+                    <option value="SE">🇸🇪 Sweden</option>
+                    <option value="DK">🇩🇰 Denmark</option>
+                    <option value="FI">🇫🇮 Finland</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="airport-select">Airport:</label>
+                <select id="airport-select" class="select">
+                    <option value="OSL">OSL - Oslo Gardermoen</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <button id="refresh-btn" class="btn">🔄 Refresh Now</button>
+            </div>
+
+            <div class="status-indicator">
+                <span id="status-text">Connecting...</span>
+                <span id="last-update"></span>
+            </div>
+        </div>
+
+        <!-- Info Bar -->
+        <div class="info-bar">
+            <div class="info-item">
+                <span class="info-label">Airport:</span>
+                <span id="current-airport" class="info-value">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Flights:</span>
+                <span id="flight-count" class="info-value">0</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Auto-refresh:</span>
+                <span class="info-value">60s</span>
+            </div>
+        </div>
+
+        <!-- Flights Display -->
+        <div class="flights-container">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading flight data...</p>
+            </div>
+            
+            <div id="error" class="error" style="display: none;">
+                <p class="error-icon">⚠️</p>
+                <p id="error-message">Failed to load flight data</p>
+                <button id="retry-btn" class="btn">Retry</button>
+            </div>
+
+            <div id="flights-grid" class="flights-grid">
+                <!-- Flights will be populated here -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Data provided by OpenSky Network | Updates every 60 seconds</p>
+            <p class="footer-small">Real-time aircraft position data from worldwide ADS-B receivers</p>
+        </footer>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
