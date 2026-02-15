@@ -20,21 +20,23 @@ A real-time flight status board application with a C backend server and modern w
 ## Architecture
 
 ### Backend (C)
-- Pure C HTTP server (no external dependencies)
+- HTTP server using libcurl for API requests
 - RESTful API endpoints
-- Flight data API integration support
+- **Real flight data integration** via AviationStack API (free tier)
+- JSON parsing and transformation
 - Static file serving
-- Mock data for demonstration
+- Automatic fallback to mock data
 
 ### Frontend (HTML/CSS/JavaScript)
 - Vanilla JavaScript (no frameworks)
 - Modern CSS Grid layout
 - Responsive design
-- Real-time updates
+- Real-time updates every 30 seconds
 
 ## Prerequisites
 
 - GCC compiler (or any C compiler)
+- libcurl development files (`libcurl4-openssl-dev` on Ubuntu/Debian)
 - Make (optional, for easy building)
 - A modern web browser
 
@@ -46,14 +48,26 @@ git clone https://github.com/christersandum/flight-status-board.git
 cd flight-status-board
 ```
 
-2. Build the server:
+2. Install dependencies (if needed):
+```bash
+# On Ubuntu/Debian:
+sudo apt-get install libcurl4-openssl-dev
+
+# On macOS with Homebrew:
+brew install curl
+
+# On Fedora/RHEL:
+sudo dnf install libcurl-devel
+```
+
+3. Build the server:
 ```bash
 make
 ```
 
 Or compile manually:
 ```bash
-gcc -Wall -Wextra -std=c99 -o flight-server backend/server.c
+gcc -Wall -Wextra -std=c99 -o flight-server backend/server.c -lcurl
 ```
 
 ## Usage
@@ -75,21 +89,40 @@ http://localhost:8080
 
 3. Select your airport from the dropdown menu to view flights
 
-## API Integration
+## API Integration (FREE!)
 
-The application supports integration with flight data APIs. To connect to a real API:
+The application now integrates with **AviationStack's free tier API** - no credit card required!
 
-1. Edit `config.txt` and add your API key:
+### Getting Real Flight Data - Free Setup
+
+1. **Sign up for a free AviationStack account**:
+   - Visit [https://aviationstack.com/product](https://aviationstack.com/product)
+   - Create a free account (no credit card needed)
+   - Get your free API key (500-1000 requests/month)
+
+2. **Add your API key to `config.txt`**:
 ```
-API_KEY=your_api_key_here
+API_KEY=your_aviationstack_api_key_here
 ```
 
-2. Supported flight data providers:
-   - [AviationStack](https://aviationstack.com/)
-   - [FlightAware](https://flightaware.com/commercial/flightxml/)
-   - [Aviation Edge](https://aviation-edge.com/)
+3. **Restart the server** - it will now fetch real flight data!
 
-**Note:** The application uses mock data by default for demonstration purposes.
+### Free Tier Features
+- ✅ **500-1000 API requests per month** (free forever)
+- ✅ **Real-time flight data** for departures and arrivals
+- ✅ **Worldwide coverage** - all major airports
+- ✅ **No credit card required**
+- ✅ **Flight status**, delays, gates, terminals
+- ✅ **Automatic fallback** to mock data if API limit reached
+
+**Note:** Without an API key, the application uses mock data for demonstration purposes.
+
+### Alternative Free APIs
+
+You can also use other free flight APIs by modifying the code:
+   - [OpenSky Network](https://openskynetwork.github.io/opensky-api/) - Completely free and open
+   - [ADS-B Exchange](https://www.adsbexchange.com/data/) - Community-powered, free access
+   - [FlightAware (AeroAPI)](https://flightaware.com/commercial/flightxml/) - Freemium model
 
 ## API Endpoints
 

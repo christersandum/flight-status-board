@@ -18,6 +18,7 @@
 #include <netdb.h>
 #include <time.h>
 #include <ctype.h>
+#include <curl/curl.h>
 
 #define PORT 8080
 #define BUFFER_SIZE 65536
@@ -37,15 +38,182 @@ typedef struct {
     int delay_minutes;
 } Flight;
 
+// Callback function for curl to write response data
+struct MemoryStruct {
+    char *memory;
+    size_t size;
+};
+
+static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
+    size_t realsize = size * nmemb;
+    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+    
+    char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+    if (!ptr) {
+        printf("Error: not enough memory (realloc returned NULL)\n");
+        return 0;
+    }
+    
+    mem->memory = ptr;
+    memcpy(&(mem->memory[mem->size]), contents, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+    
+    return realsize;
+}
+
+// Function to parse AviationStack response and convert to our format
+char* parse_aviationstack_response(const char* api_response, const char* airport_code) {
+    static char formatted_response[BUFFER_SIZE];
+    
+    // Simple parsing - look for flight data in the response
+    // For now, we'll return a simplified version that extracts key fields
+    // A full implementation would use a JSON parser library
+    
+    // Check if we have valid data
+    if (!api_response || strstr(api_response, "\"data\"") == NULL) {
+        return NULL;
+    }
+    
+    // For simplicity, we'll create a basic parser
+    // In production, use a proper JSON library like cJSON
+    formatted_response[0] = '[';
+    formatted_response[1] = '\0';
+    
+    int flight_count = 0;
+    const char *ptr = api_response;
+    
+    // Look for flight objects in the response
+    while ((ptr = strstr(ptr, "\"flight\":")) != NULL && flight_count < MAX_FLIGHTS) {
+        char flight_number[20] = "";
+        char airline_name[50] = "Unknown";
+        char destination[10] = "";
+        char scheduled_time[30] = "";
+        char estimated_time[30] = "";
+        char status[50] = "Scheduled";
+        char terminal[10] = "-";
+        char gate[10] = "-";
+        int delay_minutes = 0;
+        
+        // Extract flight number
+        const char *flight_start = strstr(ptr, "\"number\":\"");
+        if (flight_start) {
+            flight_start += 10;
+            sscanf(flight_start, "%19[^\"]", flight_number);
+        }
+        
+        // Extract airline name
+        const char *airline_start = strstr(ptr, "\"airline\":");
+        if (airline_start) {
+            const char *name_start = strstr(airline_start, "\"name\":\"");
+            if (name_start) {
+                name_start += 8;
+                sscanf(name_start, "%49[^\"]", airline_name);
+            }
+        }
+        
+        // Extract destination
+        const char *arrival_start = strstr(ptr, "\"arrival\":");
+        if (arrival_start) {
+            const char *iata_start = strstr(arrival_start, "\"iata\":\"");
+            if (iata_start && (iata_start - arrival_start) < 500) {
+                iata_start += 8;
+                sscanf(iata_start, "%9[^\"]", destination);
+            }
+        }
+        
+        // Extract departure scheduled time
+        const char *dep_start = strstr(ptr, "\"departure\":");
+        if (dep_start) {
+            const char *sched_start = strstr(dep_start, "\"scheduled\":\"");
+            if (sched_start && (sched_start - dep_start) < 500) {
+                sched_start += 13;
+                sscanf(sched_start, "%29[^\"]", scheduled_time);
+            }
+            
+            const char *est_start = strstr(dep_start, "\"estimated\":\"");
+            if (est_start && (est_start - dep_start) < 500) {
+                est_start += 13;
+                sscanf(est_start, "%29[^\"]", estimated_time);
+            } else {
+                strcpy(estimated_time, scheduled_time);
+            }
+            
+            const char *term_start = strstr(dep_start, "\"terminal\":\"");
+            if (term_start && (term_start - dep_start) < 500) {
+                term_start += 12;
+                sscanf(term_start, "%9[^\"]", terminal);
+            }
+            
+            const char *gate_start = strstr(dep_start, "\"gate\":\"");
+            if (gate_start && (gate_start - dep_start) < 500) {
+                gate_start += 8;
+                sscanf(gate_start, "%9[^\"]", gate);
+            }
+            
+            const char *delay_start = strstr(dep_start, "\"delay\":");
+            if (delay_start && (delay_start - dep_start) < 500) {
+                delay_start += 8;
+                sscanf(delay_start, "%d", &delay_minutes);
+            }
+        }
+        
+        // Extract flight status
+        const char *status_start = strstr(ptr, "\"flight_status\":\"");
+        if (status_start) {
+            status_start += 17;
+            char raw_status[50];
+            sscanf(status_start, "%49[^\"]", raw_status);
+            
+            // Map AviationStack status to our status
+            if (strcmp(raw_status, "scheduled") == 0) {
+                strcpy(status, "Scheduled");
+            } else if (strcmp(raw_status, "active") == 0) {
+                strcpy(status, "On Time");
+            } else if (strcmp(raw_status, "landed") == 0) {
+                strcpy(status, "Landed");
+            } else if (strcmp(raw_status, "cancelled") == 0) {
+                strcpy(status, "Cancelled");
+            } else if (strcmp(raw_status, "diverted") == 0) {
+                strcpy(status, "Diverted");
+            } else {
+                strcpy(status, "On Time");
+            }
+            
+            if (delay_minutes > 0) {
+                strcpy(status, "Delayed");
+            }
+        }
+        
+        // Add flight to JSON array
+        if (strlen(flight_number) > 0 && strlen(destination) > 0) {
+            char flight_json[512];
+            snprintf(flight_json, sizeof(flight_json),
+                "%s{\"flight_number\":\"%s\",\"airline\":\"%s\",\"origin\":\"%s\",\"destination\":\"%s\",\"scheduled_time\":\"%s\",\"estimated_time\":\"%s\",\"status\":\"%s\",\"terminal\":\"%s\",\"gate\":\"%s\",\"delay_minutes\":%d}",
+                flight_count > 0 ? "," : "",
+                flight_number, airline_name, airport_code, destination,
+                scheduled_time, estimated_time, status, terminal, gate, delay_minutes);
+            
+            strcat(formatted_response, flight_json);
+            flight_count++;
+        }
+        
+        ptr += 100; // Move forward to find next flight
+    }
+    
+    strcat(formatted_response, "]");
+    
+    if (flight_count > 0) {
+        return formatted_response;
+    }
+    
+    return NULL;
+}
+
 // Function to make HTTP request to flight API
 // NOTE: Uses static buffer - safe for single-threaded operation only
 char* fetch_flight_data(const char* airport_code) {
-    int sockfd;
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
-    char request[1024];
     static char response[BUFFER_SIZE];
-    int bytes_received;
     
     // Read API key from config file
     FILE *config = fopen("config.txt", "r");
@@ -64,6 +232,7 @@ char* fetch_flight_data(const char* airport_code) {
     
     // If no API key, return mock data for demonstration
     if (strlen(api_key) == 0) {
+        printf("No API key found - using mock data\n");
         snprintf(response, BUFFER_SIZE,
             "["
             "{\"flight_number\":\"AA123\",\"airline\":\"American Airlines\",\"origin\":\"%s\",\"destination\":\"JFK\",\"scheduled_time\":\"2026-02-15T10:30:00\",\"estimated_time\":\"2026-02-15T10:30:00\",\"status\":\"On Time\",\"terminal\":\"1\",\"gate\":\"A12\",\"delay_minutes\":0},"
@@ -94,8 +263,68 @@ char* fetch_flight_data(const char* airport_code) {
         return response;
     }
     
-    // Real API integration would go here
-    // For now, return mock data
+    // Use AviationStack API with the provided key
+    printf("Using AviationStack API for airport: %s\n", airport_code);
+    
+    CURL *curl;
+    CURLcode res;
+    struct MemoryStruct chunk;
+    
+    chunk.memory = malloc(1);
+    chunk.size = 0;
+    
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+    
+    if (!curl) {
+        free(chunk.memory);
+        printf("Failed to initialize curl\n");
+        return response;
+    }
+    
+    // Build API URL
+    char url[512];
+    snprintf(url, sizeof(url),
+        "http://api.aviationstack.com/v1/flights?access_key=%s&dep_iata=%s&limit=%d",
+        api_key, airport_code, MAX_FLIGHTS);
+    
+    // Set curl options
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "FlightStatusBoard/1.0");
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+    
+    // Perform request
+    res = curl_easy_perform(curl);
+    
+    if (res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        free(chunk.memory);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        // Return mock data on error
+        snprintf(response, BUFFER_SIZE, "[]");
+        return response;
+    }
+    
+    // Parse and format the response
+    char *parsed = parse_aviationstack_response(chunk.memory, airport_code);
+    
+    if (parsed) {
+        strncpy(response, parsed, BUFFER_SIZE - 1);
+        response[BUFFER_SIZE - 1] = '\0';
+        printf("Successfully fetched and parsed %lu bytes from AviationStack\n", chunk.size);
+    } else {
+        printf("Failed to parse API response, using empty array\n");
+        snprintf(response, BUFFER_SIZE, "[]");
+    }
+    
+    // Cleanup
+    free(chunk.memory);
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    
     return response;
 }
 

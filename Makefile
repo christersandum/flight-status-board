@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
+LDFLAGS = -lcurl
 TARGET = flight-server
 SRC = backend/server.c
 
@@ -8,7 +9,7 @@ SRC = backend/server.c
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(LDFLAGS)
 
 run: $(TARGET)
 	./$(TARGET)
