@@ -58,7 +58,7 @@ const flights = [
         scheduled: '13:45',
         expected: '13:45',
         gate: 'B12',
-        status: 'departed'
+        status: 'landed'
     },
     {
         flight: 'QF1',
@@ -118,7 +118,7 @@ const flights = [
         scheduled: '14:00',
         expected: '14:05',
         gate: 'C9',
-        status: 'boarding'
+        status: 'on-time'
     }
 ];
 
