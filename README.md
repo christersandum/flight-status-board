@@ -60,21 +60,32 @@ sudo apt install -y gcc make libcurl4-openssl-dev git
 sudo apt install -y nginx
 ```
 
-#### 4. Clone and Build the Application
+#### 4. Create a Dedicated User (Security Best Practice)
 
 ```bash
+# Create a dedicated user for running the application
+sudo useradd -r -s /bin/false flightboard
+
 # Create a directory for the application
-mkdir -p /opt/flight-status-board
+sudo mkdir -p /opt/flight-status-board
+sudo chown flightboard:flightboard /opt/flight-status-board
+```
+
+#### 5. Clone and Build the Application
+
+```bash
+# Switch to the application directory
 cd /opt/flight-status-board
 
 # Clone the repository
-git clone https://github.com/christersandum/flight-status-board.git .
+sudo -u flightboard git clone https://github.com/christersandum/flight-status-board.git .
 
-# Build the application
-make
+# Install dependencies and build
+sudo apt install -y gcc make libcurl4-openssl-dev
+sudo -u flightboard make
 ```
 
-#### 5. Configure the Application (Optional)
+#### 6. Configure the Application (Optional)
 
 If you want real flight data, add your API key:
 
@@ -84,7 +95,7 @@ nano config.txt
 # Add: API_KEY=your_api_key_here
 ```
 
-#### 6. Test the Application
+#### 7. Test the Application
 
 ```bash
 # Start the server
@@ -97,7 +108,7 @@ nano config.txt
 
 Press Ctrl+C to stop the server.
 
-#### 7. Set Up as a System Service (Run Automatically)
+#### 8. Set Up as a System Service (Run Automatically)
 
 Create a systemd service file to run the application automatically:
 
@@ -114,11 +125,19 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=flightboard
+Group=flightboard
 WorkingDirectory=/opt/flight-status-board
 ExecStart=/opt/flight-status-board/flight-server
 Restart=always
 RestartSec=3
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/flight-status-board
 
 [Install]
 WantedBy=multi-user.target
@@ -152,7 +171,7 @@ sudo systemctl restart flight-status-board
 sudo journalctl -u flight-status-board -f
 ```
 
-#### 8. Configure Firewall
+#### 9. Configure Firewall
 
 ```bash
 # Allow HTTP traffic (port 80)
@@ -171,7 +190,7 @@ sudo ufw enable
 sudo ufw status
 ```
 
-#### 9. Set Up Reverse Proxy with Nginx (Recommended)
+#### 10. Set Up Reverse Proxy with Nginx (Recommended)
 
 Using Nginx as a reverse proxy provides better performance and allows you to:
 - Use a domain name instead of IP:8080
@@ -220,7 +239,7 @@ sudo systemctl reload nginx
 
 Now you can access your application at `http://your-domain.com` (without the :8080 port).
 
-#### 10. Set Up HTTPS with Let's Encrypt (Recommended)
+#### 11. Set Up HTTPS with Let's Encrypt (Recommended)
 
 Secure your application with free SSL certificates:
 
@@ -253,7 +272,7 @@ To use a domain name instead of an IP address:
 
 1. **Purchase a domain** from:
    - [Namecheap](https://www.namecheap.com/)
-   - [Google Domains](https://domains.google/)
+   - [Porkbun](https://porkbun.com/)
    - [Cloudflare Registrar](https://www.cloudflare.com/products/registrar/)
 
 2. **Configure DNS records** in your domain registrar:
@@ -378,8 +397,9 @@ For easier deployment and portability, you can use Docker (see the Dockerfile in
 - Kill the process or change the application port in `backend/server.c`
 
 **Permission denied errors:**
-- Ensure proper ownership: `sudo chown -R root:root /opt/flight-status-board`
+- Ensure proper ownership: `sudo chown -R flightboard:flightboard /opt/flight-status-board`
 - Check file permissions: `ls -la /opt/flight-status-board`
+- Verify the service is running as the correct user: `ps aux | grep flight-server`
 
 **Nginx errors:**
 - Test configuration: `sudo nginx -t`
