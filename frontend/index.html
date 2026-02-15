@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Status Board</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="board-header">
+            <div class="header-content">
+                <h1 class="board-title">
+                    <span class="plane-icon">✈️</span>
+                    FLIGHT STATUS BOARD
+                </h1>
+                <div class="airport-selector">
+                    <label for="airport">Airport:</label>
+                    <select id="airport" onchange="changeAirport()">
+                        <option value="JFK">JFK - John F. Kennedy International</option>
+                        <option value="LAX">LAX - Los Angeles International</option>
+                        <option value="ORD">ORD - Chicago O'Hare International</option>
+                        <option value="ATL">ATL - Hartsfield-Jackson Atlanta International</option>
+                        <option value="DFW">DFW - Dallas/Fort Worth International</option>
+                        <option value="DEN">DEN - Denver International</option>
+                        <option value="SFO">SFO - San Francisco International</option>
+                        <option value="SEA">SEA - Seattle-Tacoma International</option>
+                    </select>
+                </div>
+                <div class="current-time" id="currentTime"></div>
+            </div>
+        </header>
+
+        <div class="filter-tabs">
+            <button class="tab-btn active" onclick="filterFlights('all', event)">All Flights</button>
+            <button class="tab-btn" onclick="filterFlights('departures', event)">Departures</button>
+            <button class="tab-btn" onclick="filterFlights('arrivals', event)">Arrivals</button>
+        </div>
+
+        <div class="flight-board">
+            <table class="flight-table">
+                <thead>
+                    <tr>
+                        <th>Flight</th>
+                        <th>Airline</th>
+                        <th>Destination/Origin</th>
+                        <th>Scheduled</th>
+                        <th>Expected</th>
+                        <th>Status</th>
+                        <th>Terminal</th>
+                        <th>Gate</th>
+                    </tr>
+                </thead>
+                <tbody id="flightTableBody">
+                    <!-- Flight data will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="status-bar">
+            <span class="status-indicator">
+                <span class="status-dot on-time"></span> On Time
+            </span>
+            <span class="status-indicator">
+                <span class="status-dot delayed"></span> Delayed
+            </span>
+            <span class="status-indicator">
+                <span class="status-dot cancelled"></span> Cancelled
+            </span>
+            <span class="status-indicator">
+                <span class="status-dot boarding"></span> Boarding
+            </span>
+            <span class="auto-refresh">
+                Auto-refresh in <span id="refreshCounter">60</span>s
+            </span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
