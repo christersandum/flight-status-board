@@ -64,7 +64,7 @@ sudo apt install -y nginx
 
 ```bash
 # Create a dedicated user for running the application
-sudo useradd -r -s /bin/false flightboard
+sudo useradd -r -s /usr/sbin/nologin flightboard
 
 # Create a directory for the application
 sudo mkdir -p /opt/flight-status-board
@@ -292,7 +292,7 @@ To use a domain name instead of an IP address:
      TTL: 3600
      ```
 
-3. **Wait for DNS propagation** (typically 5-30 minutes for most providers, though may take longer in rare cases)
+3. **Wait for DNS propagation** (typically 5-30 minutes for most major DNS resolvers, though complete global propagation can take up to 24-48 hours in some cases)
 
 4. **Test your domain**:
    ```bash
