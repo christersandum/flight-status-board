@@ -24,7 +24,17 @@ const destinations = {
 
 const statuses = ['On Time', 'Delayed', 'Boarding', 'Cancelled'];
 const terminals = ['1', '2', '3', '4', '5', 'A', 'B', 'C', 'D'];
-const gates = Array.from({length: 50}, (_, i) => String(i + 1));
+
+// Generate alphanumeric gates (A1-D50)
+const gates = [];
+['A', 'B', 'C', 'D'].forEach(terminal => {
+    for (let i = 1; i <= 50; i++) {
+        gates.push(`${terminal}${i}`);
+    }
+});
+
+const MIN_FLIGHTS = 20;
+const FLIGHT_RANGE = 11;
 
 let currentAirport = 'JFK';
 let currentFilter = 'all';
@@ -82,8 +92,8 @@ function generateFlights() {
     const now = new Date();
     const currentHour = now.getHours();
     
-    // Generate 20-30 flights
-    const numFlights = Math.floor(Math.random() * 11) + 20;
+    // Generate 20-30 flights (MIN_FLIGHTS + random value up to FLIGHT_RANGE)
+    const numFlights = Math.floor(Math.random() * FLIGHT_RANGE) + MIN_FLIGHTS;
     
     for (let i = 0; i < numFlights; i++) {
         const isDeparture = Math.random() > 0.5;
