@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Status Board</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>✈️ Flight Status Board</h1>
+            <div class="subtitle">Live Departures</div>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="country-select">Country:</label>
+                <select id="country-select" class="select-box">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="airport-select">Airport:</label>
+                <select id="airport-select" class="select-box">
+                    <option value="">Select country first</option>
+                </select>
+            </div>
+
+            <button id="refresh-btn" class="refresh-btn">
+                <span class="refresh-icon">↻</span> Refresh
+            </button>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading flight data...</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            <p>Failed to load data. Please try again.</p>
+        </div>
+
+        <div id="flights-container" class="flights-container">
+            <!-- Flights will be dynamically inserted here -->
+        </div>
+
+        <footer class="footer">
+            <p>Last updated: <span id="last-updated">Never</span></p>
+            <p class="footer-note">Auto-refresh every 60 seconds</p>
+        </footer>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+# Build artifacts
+backend/build/
+backend/*.o
+backend/CMakeFiles/
+backend/CMakeCache.txt
+backend/cmake_install.cmake
+backend/Makefile.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+.cache/
+tmp/
+
+# Docker
+mongo-data/
+data/
+logs/
+
+# CodeQL analysis
+_codeql_detected_source_root
+backend/_codeql_build_dir/
