@@ -2,15 +2,18 @@
 
 Real-time flight status board application displaying live aviation data from the OpenSky Network API.
 
+![Flight Status Board](https://github.com/user-attachments/assets/cace8e6a-d73e-4324-83c3-739ea42a6529)
+
 ## 🌟 Features
 
 - **Real-time Flight Data**: Live flight information from OpenSky Network
-- **Multiple Airports**: Support for Nordic airports (OSL, ARN, CPH, HEL, BGO)
-- **Country Selection**: Filter airports by country (Norway, Sweden, Denmark, Finland)
+- **Norwegian Airports**: Support for 5 Norwegian airports (OSL, BGO, TRD, SVG, AES)
+- **Manual Refresh**: Manual refresh button (no auto-refresh)
+- **Exactly 10 Flights**: Displays exactly 10 flights in 2-column layout
 - **Professional UI**: Terminal-style green-on-black display
-- **Auto-refresh**: Updates every 60 seconds
 - **Responsive Design**: Works on desktop and mobile devices
 - **Real API Integration**: No mock data - all flights are real
+- **Proper Units**: Altitude in feet, speed in knots
 
 ## 🚀 Quick Start
 
@@ -19,41 +22,33 @@ Real-time flight status board application displaying live aviation data from the
 1. **Install dependencies:**
    ```bash
    npm install
-   # or
-   make install
    ```
 
 2. **Start the server:**
    ```bash
    npm start
-   # or
-   make start
    ```
 
 3. **Open browser:**
    Navigate to `http://localhost:8080`
+
+### Test Mode (for development without internet)
+
+Start the server in test mode to use mock data:
+```bash
+TEST_MODE=true npm start
+```
 
 ### Docker Deployment
 
 1. **Build Docker image:**
    ```bash
    docker build -t flight-status-board .
-   # or
-   make build
    ```
 
 2. **Run container:**
    ```bash
    docker run -p 8080:8080 flight-status-board
-   # or
-   make docker-run
-   ```
-
-3. **Using Docker Compose:**
-   ```bash
-   docker-compose up
-   # or
-   make docker-compose-up
    ```
 
 ### Railway Deployment
@@ -79,20 +74,20 @@ Returns server health status.
 ```
 GET /api/countries
 ```
-Returns list of available countries with their airports.
+Returns list of available countries (Norway only).
 
 ### Airports
 ```
 GET /api/airports
 GET /api/airports?country=NO
 ```
-Returns airports, optionally filtered by country code.
+Returns Norwegian airports.
 
 ### Flights
 ```
 GET /api/flights?airport=OSL
 ```
-Returns real-time flight data for specified airport.
+Returns exactly 10 real-time flights for specified airport.
 
 Response format:
 ```json
@@ -110,7 +105,7 @@ Response format:
       "originCountry": "Norway",
       "latitude": 60.193,
       "longitude": 11.095,
-      "altitude": 1200,
+      "altitude": 3937,
       "velocity": 250,
       "heading": 180,
       "verticalRate": -5.5,
@@ -118,10 +113,12 @@ Response format:
       "lastContact": "2026-02-15T10:30:00Z"
     }
   ],
-  "count": 15,
+  "count": 10,
   "timestamp": "2026-02-15T10:30:00Z"
 }
 ```
+
+**Note:** Altitude is in feet, velocity is in knots.
 
 ## 🛠 Technology Stack
 
@@ -145,7 +142,7 @@ Response format:
 
 This application uses the [OpenSky Network API](https://opensky-network.org/api/) to fetch real-time aircraft position data from worldwide ADS-B receivers.
 
-**Data Refresh Rate:** Every 60 seconds  
+**Data Refresh:** Manual only (button click)  
 **Coverage:** Worldwide ADS-B coverage  
 **API Limits:** Public API has rate limits; consider authentication for higher limits
 
@@ -153,19 +150,22 @@ This application uses the [OpenSky Network API](https://opensky-network.org/api/
 
 | Code | Airport Name | Country |
 |------|--------------|---------|
-| OSL | Oslo Airport Gardermoen | Norway |
-| ARN | Stockholm Arlanda Airport | Sweden |
-| CPH | Copenhagen Airport | Denmark |
-| HEL | Helsinki-Vantaa Airport | Finland |
+| OSL | Oslo Airport Gardermoen | Norway (default) |
 | BGO | Bergen Airport Flesland | Norway |
+| TRD | Trondheim Airport Værnes | Norway |
+| SVG | Stavanger Airport Sola | Norway |
+| AES | Ålesund Airport Vigra | Norway |
 
 ## 🔧 Development
 
 ### Project Structure
 ```
 flight-status-board/
-├── server.js              # Express backend
+├── server.js              # Express backend (root)
 ├── package.json           # Dependencies
+├── backend/
+│   ├── server.js         # Backend copy
+│   └── package.json      # Backend dependencies
 ├── public/
 │   ├── index.html        # Frontend HTML
 │   ├── css/
@@ -174,14 +174,14 @@ flight-status-board/
 │       ├── api.js        # API communication
 │       └── app.js        # Frontend logic
 ├── Dockerfile            # Docker configuration
-├── docker-compose.yml    # Docker Compose config
-└── Makefile             # Build commands
+└── README.md            # Documentation
 ```
 
 ### Environment Variables
 
 - `PORT` - Server port (default: 8080)
 - `NODE_ENV` - Environment mode (production/development)
+- `TEST_MODE` - Enable test mode with mock data (true/false)
 
 ## 🧪 Testing
 
@@ -200,9 +200,10 @@ curl http://localhost:8080/api/airports
 curl http://localhost:8080/api/flights?airport=OSL
 ```
 
-Or use the Makefile:
+**Test Mode:**
 ```bash
-make test
+# Run in test mode with mock data
+TEST_MODE=true npm start
 ```
 
 ## 📝 License
