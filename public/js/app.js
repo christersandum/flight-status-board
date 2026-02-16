@@ -126,13 +126,13 @@ class FlightStatusBoard {
         airports.forEach(airport => {
             const option = document.createElement('option');
             option.value = airport.code;
-            option.textContent = `${airport.code} - ${airport.name.toUpperCase()}`;
+            option.textContent = `${airport.code} - ${this.formatAirportName(airport.name)}`;
             this.elements.airportSelect.appendChild(option);
         });
 
         if (airports.length > 0) {
             this.currentAirport = airports[0].code;
-            this.elements.airportName.textContent = airports[0].name.toUpperCase();
+            this.elements.airportName.textContent = this.formatAirportName(airports[0].name);
         }
     }
 
@@ -141,7 +141,7 @@ class FlightStatusBoard {
         const airports = this.airports[this.currentCountry] || [];
         const airport = airports.find(a => a.code === this.currentAirport);
         if (airport) {
-            this.elements.airportName.textContent = airport.name.toUpperCase();
+            this.elements.airportName.textContent = this.formatAirportName(airport.name);
         }
         this.refreshFlights();
     }
@@ -314,6 +314,10 @@ class FlightStatusBoard {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    formatAirportName(name) {
+        return (name || '').toUpperCase();
     }
 }
 

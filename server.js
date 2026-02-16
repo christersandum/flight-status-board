@@ -163,7 +163,7 @@ function getFlightStatus(altitude, verticalRate) {
 
 // Get airport name from ICAO code
 function getAirportName(icao) {
-  if (!icao) return 'UNKNOWN';
+  if (!icao || typeof icao !== 'string') return 'UNKNOWN';
   return AIRPORT_NAMES[icao.toUpperCase()] || icao.toUpperCase();
 }
 
@@ -181,14 +181,10 @@ function getDepartureStatus(firstSeen, lastSeen) {
   const departureTime = firstSeen || now;
   const timeSinceDeparture = now - departureTime;
   
-  if (timeSinceDeparture > 3600) {
-    return 'Departed';
-  } else if (timeSinceDeparture > 1800) {
+  if (timeSinceDeparture > 1800) {
     return 'Departed';
   } else if (timeSinceDeparture > 600) {
     return 'Boarding';
-  } else if (timeSinceDeparture > -1800) {
-    return 'Scheduled';
   } else {
     return 'Scheduled';
   }
@@ -201,8 +197,6 @@ function getArrivalStatus(firstSeen, lastSeen) {
   const timeUntilArrival = arrivalTime - now;
   
   if (timeUntilArrival < -3600) {
-    return 'Landed';
-  } else if (timeUntilArrival < 0) {
     return 'Landed';
   } else if (timeUntilArrival < 1800) {
     return 'On Approach';
