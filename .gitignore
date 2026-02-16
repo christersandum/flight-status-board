@@ -39,7 +39,8 @@ temp/
 *.tmp
 
 # Backend C files (legacy, not used)
-backend/
+backend/CMakeLists.txt
+backend/src/
 CMakeLists.txt
 
 # Deployment guide (keep in repo but not needed for runtime)

@@ -1,0 +1,27 @@
+{
+  "name": "flight-status-board",
+  "version": "1.0.0",
+  "description": "Real-time flight status board with OpenSky API integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "flight",
+    "status",
+    "aviation",
+    "opensky",
+    "real-time"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.13.5",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

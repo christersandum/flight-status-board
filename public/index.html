@@ -20,9 +20,6 @@
                 <label for="country-select">Country:</label>
                 <select id="country-select" class="select">
                     <option value="NO">🇳🇴 Norway</option>
-                    <option value="SE">🇸🇪 Sweden</option>
-                    <option value="DK">🇩🇰 Denmark</option>
-                    <option value="FI">🇫🇮 Finland</option>
                 </select>
             </div>
             
@@ -34,11 +31,11 @@
             </div>
 
             <div class="control-group">
-                <button id="refresh-btn" class="btn">🔄 Refresh Now</button>
+                <button id="refresh-btn" class="btn">🔄 Refresh Flights</button>
             </div>
 
             <div class="status-indicator">
-                <span id="status-text">Connecting...</span>
+                <span id="status-text">Ready</span>
                 <span id="last-update"></span>
             </div>
         </div>
@@ -54,8 +51,8 @@
                 <span id="flight-count" class="info-value">0</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Auto-refresh:</span>
-                <span class="info-value">60s</span>
+                <span class="info-label">Refresh:</span>
+                <span class="info-value">Manual Only</span>
             </div>
         </div>
 
@@ -79,7 +76,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p>Data provided by OpenSky Network | Updates every 60 seconds</p>
+            <p>Data provided by OpenSky Network | Manual refresh only</p>
             <p class="footer-small">Real-time aircraft position data from worldwide ADS-B receivers</p>
         </footer>
     </div>

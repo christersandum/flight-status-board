@@ -205,7 +205,7 @@ body {
 /* Flights Grid */
 .flights-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
 }
 
