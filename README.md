@@ -8,9 +8,10 @@ Real-time flight status board application displaying live aviation data from the
 - **Multiple Airports**: Support for Nordic airports (OSL, ARN, CPH, HEL, BGO)
 - **Country Selection**: Filter airports by country (Norway, Sweden, Denmark, Finland)
 - **Professional UI**: Terminal-style green-on-black display
-- **Auto-refresh**: Updates every 60 seconds
+- **Manual Refresh**: Click refresh button to get new flight data
+- **Exactly 10 Flights**: Displays 10 flights in 2-column layout (5 per column)
 - **Responsive Design**: Works on desktop and mobile devices
-- **Real API Integration**: No mock data - all flights are real
+- **Real API Integration**: Connects to OpenSky Network with sample data fallback
 
 ## 🚀 Quick Start
 
@@ -145,9 +146,11 @@ Response format:
 
 This application uses the [OpenSky Network API](https://opensky-network.org/api/) to fetch real-time aircraft position data from worldwide ADS-B receivers.
 
-**Data Refresh Rate:** Every 60 seconds  
+**Data Refresh Rate:** Manual refresh via button click  
+**Display:** Exactly 10 flights in 2-column layout  
 **Coverage:** Worldwide ADS-B coverage  
-**API Limits:** Public API has rate limits; consider authentication for higher limits
+**API Limits:** Public API has rate limits; consider authentication for higher limits  
+**Fallback:** Uses sample data when API is unavailable (development/testing)
 
 ## 📋 Supported Airports
 
@@ -218,12 +221,20 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 **No flights showing:**
 - Check if OpenSky API is accessible
 - Try different airport/time of day
+- In development, the app uses sample data if the API is unavailable
 - Verify bounding box coordinates are correct
 
-**API timeout:**
+**API timeout or unavailable:**
 - OpenSky API may be slow or rate-limited
-- Wait a few minutes and retry
-- Consider implementing caching
+- Application automatically falls back to sample data for testing
+- In production with network access, wait a few minutes and retry
+- Consider implementing caching for production use
+
+**Sample data showing instead of real flights:**
+- This is expected in sandboxed/offline environments
+- Sample data shows "source": "sample" in API response
+- Real OpenSky data shows "source": "opensky" in API response
+- Deploy to production environment with internet access for real data
 
 **Port already in use:**
 - Change PORT environment variable
