@@ -149,7 +149,7 @@ app.get('/api/flights', async (req, res) => {
     //          true_track, vertical_rate, sensors, geo_altitude, squawk, spi, position_source]
     const flights = response.data.states
       .filter(state => state[1] && state[1].trim()) // Has callsign
-      .slice(0, 20) // Limit to 20 flights
+      .slice(0, 10) // Limit to exactly 10 flights
       .map(state => ({
         icao24: state[0],
         callsign: state[1] ? state[1].trim() : 'Unknown',
