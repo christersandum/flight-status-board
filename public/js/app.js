@@ -54,9 +54,6 @@ class FlightStatusBoard {
             // Load initial flights
             await this.refreshFlights();
             
-            // Start auto-refresh
-            this.startAutoRefresh();
-            
         } catch (error) {
             this.showError('Failed to initialize application: ' + error.message);
         }
@@ -216,17 +213,18 @@ class FlightStatusBoard {
         }
     }
 
-    startAutoRefresh() {
-        // Clear any existing interval
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-        }
-        
-        // Refresh every 60 seconds
-        this.refreshInterval = setInterval(() => {
-            this.refreshFlights();
-        }, 60000);
-    }
+    // Auto-refresh has been disabled - use manual refresh button instead
+    // startAutoRefresh() {
+    //     // Clear any existing interval
+    //     if (this.refreshInterval) {
+    //         clearInterval(this.refreshInterval);
+    //     }
+    //     
+    //     // Refresh every 60 seconds
+    //     this.refreshInterval = setInterval(() => {
+    //         this.refreshFlights();
+    //     }, 60000);
+    // }
 
     formatTime(timestamp) {
         const date = new Date(timestamp);
