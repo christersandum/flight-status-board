@@ -406,6 +406,95 @@ app.get('/api/arrivals', async (req, res) => {
   }
 });
 
+// Demo endpoint with mock data for testing
+app.get('/api/departures/demo', async (req, res) => {
+  const airportCode = req.query.airport || 'OSL';
+  const airport = AIRPORTS[airportCode];
+  
+  if (!airport) {
+    return res.status(400).json({ 
+      error: 'Invalid airport code',
+      validCodes: Object.keys(AIRPORTS)
+    });
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  
+  // Mock departure data
+  const mockFlights = [
+    { callsign: 'SK4455', estArrivalAirport: 'ESSA', firstSeen: now - 1800, lastSeen: now - 1200 },
+    { callsign: 'DY622', estArrivalAirport: 'ENBR', firstSeen: now - 900, lastSeen: now - 300 },
+    { callsign: 'LH867', estArrivalAirport: 'EDDF', firstSeen: now + 600, lastSeen: now + 1200 },
+    { callsign: 'KL1152', estArrivalAirport: 'EHAM', firstSeen: now + 1200, lastSeen: now + 1800 },
+    { callsign: 'BA762', estArrivalAirport: 'EGLL', firstSeen: now + 1800, lastSeen: now + 2400 },
+    { callsign: 'AF1268', estArrivalAirport: 'LFPG', firstSeen: now + 2400, lastSeen: now + 3000 },
+    { callsign: 'AY681', estArrivalAirport: 'EFHK', firstSeen: now + 3000, lastSeen: now + 3600 },
+    { callsign: 'SK1465', estArrivalAirport: 'EKCH', firstSeen: now + 3600, lastSeen: now + 4200 }
+  ];
+
+  const flights = mockFlights.map(flight => ({
+    callsign: flight.callsign,
+    estDepartureAirport: airport.icao,
+    estArrivalAirport: flight.estArrivalAirport,
+    estArrivalAirportName: getAirportName(flight.estArrivalAirport),
+    firstSeen: flight.firstSeen,
+    lastSeen: flight.lastSeen,
+    gate: generateGate(),
+    status: getDepartureStatus(flight.firstSeen, flight.lastSeen)
+  }));
+
+  res.json({
+    airport: airport,
+    flights: flights,
+    count: flights.length,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Demo endpoint with mock arrivals data for testing
+app.get('/api/arrivals/demo', async (req, res) => {
+  const airportCode = req.query.airport || 'OSL';
+  const airport = AIRPORTS[airportCode];
+  
+  if (!airport) {
+    return res.status(400).json({ 
+      error: 'Invalid airport code',
+      validCodes: Object.keys(AIRPORTS)
+    });
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  
+  // Mock arrival data
+  const mockFlights = [
+    { callsign: 'SK4456', estDepartureAirport: 'ESSA', firstSeen: now - 5400, lastSeen: now - 3600 },
+    { callsign: 'DY623', estDepartureAirport: 'ENBR', firstSeen: now - 4800, lastSeen: now - 900 },
+    { callsign: 'LH868', estDepartureAirport: 'EDDF', firstSeen: now - 7200, lastSeen: now - 300 },
+    { callsign: 'KL1153', estDepartureAirport: 'EHAM', firstSeen: now - 6600, lastSeen: now + 600 },
+    { callsign: 'BA763', estDepartureAirport: 'EGLL', firstSeen: now - 6000, lastSeen: now + 1200 },
+    { callsign: 'AF1269', estDepartureAirport: 'LFPG', firstSeen: now - 5400, lastSeen: now + 1800 },
+    { callsign: 'AY682', estDepartureAirport: 'EFHK', firstSeen: now - 4800, lastSeen: now + 2400 }
+  ];
+
+  const flights = mockFlights.map(flight => ({
+    callsign: flight.callsign,
+    estDepartureAirport: flight.estDepartureAirport,
+    estDepartureAirportName: getAirportName(flight.estDepartureAirport),
+    estArrivalAirport: airport.icao,
+    firstSeen: flight.firstSeen,
+    lastSeen: flight.lastSeen,
+    gate: generateGate(),
+    status: getArrivalStatus(flight.firstSeen, flight.lastSeen)
+  }));
+
+  res.json({
+    airport: airport,
+    flights: flights,
+    count: flights.length,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Get flights for a specific airport
 app.get('/api/flights', async (req, res) => {
   try {
