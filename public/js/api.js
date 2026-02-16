@@ -47,6 +47,32 @@ class FlightAPI {
         }
     }
 
+    async fetchDepartures(airportCode) {
+        try {
+            const response = await fetch(`${this.baseURL}/api/departures?airport=${airportCode}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching departures:', error);
+            throw error;
+        }
+    }
+
+    async fetchArrivals(airportCode) {
+        try {
+            const response = await fetch(`${this.baseURL}/api/arrivals?airport=${airportCode}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching arrivals:', error);
+            throw error;
+        }
+    }
+
     async checkHealth() {
         try {
             const response = await fetch(`${this.baseURL}/health`);
