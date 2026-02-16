@@ -11,7 +11,7 @@ Real-time flight status board application displaying live aviation data from the
 - **Manual Refresh**: Click refresh button to get new flight data
 - **Exactly 10 Flights**: Displays 10 flights in 2-column layout (5 per column)
 - **Responsive Design**: Works on desktop and mobile devices
-- **Real API Integration**: Connects to OpenSky Network with sample data fallback
+- **OpenSky Network Integration**: Connects to real API with sample data fallback for testing
 
 ## 🚀 Quick Start
 
