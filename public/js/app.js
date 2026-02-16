@@ -54,8 +54,7 @@ class FlightStatusBoard {
             // Load initial flights
             await this.refreshFlights();
             
-            // Start auto-refresh
-            this.startAutoRefresh();
+            // NO auto-refresh - manual only
             
         } catch (error) {
             this.showError('Failed to initialize application: ' + error.message);
@@ -162,11 +161,11 @@ class FlightStatusBoard {
                 </div>
                 <div class="flight-detail">
                     <span class="detail-label">Altitude:</span>
-                    <span class="detail-value">${flight.altitude} m</span>
+                    <span class="detail-value">${flight.altitude} ft</span>
                 </div>
                 <div class="flight-detail">
-                    <span class="detail-label">Velocity:</span>
-                    <span class="detail-value">${flight.velocity} km/h</span>
+                    <span class="detail-label">Speed:</span>
+                    <span class="detail-value">${flight.velocity} kts</span>
                 </div>
                 <div class="flight-detail">
                     <span class="detail-label">Heading:</span>
@@ -214,18 +213,6 @@ class FlightStatusBoard {
             const time = new Date(timestamp).toLocaleTimeString();
             this.elements.lastUpdate.textContent = `Last update: ${time}`;
         }
-    }
-
-    startAutoRefresh() {
-        // Clear any existing interval
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-        }
-        
-        // Refresh every 60 seconds
-        this.refreshInterval = setInterval(() => {
-            this.refreshFlights();
-        }, 60000);
     }
 
     formatTime(timestamp) {

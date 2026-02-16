@@ -23,30 +23,6 @@ const AIRPORTS = {
     lon: 11.1004,
     bbox: { lamin: 59.9, lomin: 10.8, lamax: 60.5, lomax: 11.4 }
   },
-  ARN: {
-    name: 'Stockholm Arlanda Airport',
-    code: 'ARN',
-    country: 'Sweden',
-    lat: 59.6519,
-    lon: 17.9186,
-    bbox: { lamin: 59.4, lomin: 17.7, lamax: 59.9, lomax: 18.2 }
-  },
-  CPH: {
-    name: 'Copenhagen Airport',
-    code: 'CPH',
-    country: 'Denmark',
-    lat: 55.6181,
-    lon: 12.6561,
-    bbox: { lamin: 55.4, lomin: 12.4, lamax: 55.8, lomax: 12.9 }
-  },
-  HEL: {
-    name: 'Helsinki-Vantaa Airport',
-    code: 'HEL',
-    country: 'Finland',
-    lat: 60.3172,
-    lon: 24.9633,
-    bbox: { lamin: 60.1, lomin: 24.7, lamax: 60.5, lomax: 25.2 }
-  },
   BGO: {
     name: 'Bergen Airport Flesland',
     code: 'BGO',
@@ -54,14 +30,35 @@ const AIRPORTS = {
     lat: 60.2934,
     lon: 5.2181,
     bbox: { lamin: 60.1, lomin: 5.0, lamax: 60.5, lomax: 5.5 }
+  },
+  TRD: {
+    name: 'Trondheim Airport Værnes',
+    code: 'TRD',
+    country: 'Norway',
+    lat: 63.4578,
+    lon: 10.9239,
+    bbox: { lamin: 63.3, lomin: 10.7, lamax: 63.6, lomax: 11.1 }
+  },
+  SVG: {
+    name: 'Stavanger Airport Sola',
+    code: 'SVG',
+    country: 'Norway',
+    lat: 58.8767,
+    lon: 5.6378,
+    bbox: { lamin: 58.7, lomin: 5.4, lamax: 59.0, lomax: 5.9 }
+  },
+  AES: {
+    name: 'Ålesund Airport Vigra',
+    code: 'AES',
+    country: 'Norway',
+    lat: 62.5625,
+    lon: 6.1197,
+    bbox: { lamin: 62.4, lomin: 5.9, lamax: 62.7, lomax: 6.3 }
   }
 };
 
 const COUNTRIES = [
-  { code: 'NO', name: 'Norway', airports: ['OSL', 'BGO'] },
-  { code: 'SE', name: 'Sweden', airports: ['ARN'] },
-  { code: 'DK', name: 'Denmark', airports: ['CPH'] },
-  { code: 'FI', name: 'Finland', airports: ['HEL'] }
+  { code: 'NO', name: 'Norway', airports: ['OSL', 'BGO', 'TRD', 'SVG', 'AES'] }
 ];
 
 // OpenSky API base URL
@@ -149,7 +146,7 @@ app.get('/api/flights', async (req, res) => {
     //          true_track, vertical_rate, sensors, geo_altitude, squawk, spi, position_source]
     const flights = response.data.states
       .filter(state => state[1] && state[1].trim()) // Has callsign
-      .slice(0, 20) // Limit to 20 flights
+      .slice(0, 10) // Limit to exactly 10 flights
       .map(state => ({
         icao24: state[0],
         callsign: state[1] ? state[1].trim() : 'Unknown',
@@ -157,9 +154,9 @@ app.get('/api/flights', async (req, res) => {
         originCountry: state[2],
         latitude: state[6],
         longitude: state[5],
-        altitude: state[7] ? Math.round(state[7]) : 0,
+        altitude: state[7] ? Math.round(state[7] * 3.28084) : 0, // Convert meters to feet
         onGround: state[8],
-        velocity: state[9] ? Math.round(state[9] * 3.6) : 0, // Convert m/s to km/h
+        velocity: state[9] ? Math.round(state[9] * 1.94384) : 0, // Convert m/s to knots
         heading: state[10] ? Math.round(state[10]) : 0,
         verticalRate: state[11] ? parseFloat(state[11].toFixed(1)) : 0,
         status: getFlightStatus(state[7], state[11]),
