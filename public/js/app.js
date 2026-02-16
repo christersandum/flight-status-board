@@ -4,7 +4,6 @@ class FlightStatusBoard {
         this.api = new FlightAPI();
         this.currentAirport = 'OSL';
         this.currentCountry = 'NO';
-        this.refreshInterval = null;
         this.countries = [];
         this.airports = {};
         
@@ -53,9 +52,6 @@ class FlightStatusBoard {
             
             // Load initial flights
             await this.refreshFlights();
-            
-            // Start auto-refresh
-            this.startAutoRefresh();
             
         } catch (error) {
             this.showError('Failed to initialize application: ' + error.message);
@@ -214,18 +210,6 @@ class FlightStatusBoard {
             const time = new Date(timestamp).toLocaleTimeString();
             this.elements.lastUpdate.textContent = `Last update: ${time}`;
         }
-    }
-
-    startAutoRefresh() {
-        // Clear any existing interval
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-        }
-        
-        // Refresh every 60 seconds
-        this.refreshInterval = setInterval(() => {
-            this.refreshFlights();
-        }, 60000);
     }
 
     formatTime(timestamp) {
