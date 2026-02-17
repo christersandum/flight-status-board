@@ -3,84 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Status Board - Live Aviation Data</title>
+    <title>Flight Information Display System</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+    <div class="scanlines"></div>
+    
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1 class="title">✈️ FLIGHT STATUS BOARD</h1>
-            <div class="subtitle">LIVE AVIATION DATA FROM OPENSKY NETWORK</div>
+            <div class="header-top">
+                <h1 class="title">✈️ FLIGHT INFORMATION DISPLAY SYSTEM</h1>
+                <div class="digital-clock" id="digital-clock">--:--:--</div>
+            </div>
+            <div class="airport-name" id="airport-name">OSLO AIRPORT GARDERMOEN</div>
         </header>
 
         <!-- Controls -->
         <div class="controls">
             <div class="control-group">
-                <label for="country-select">Country:</label>
+                <label for="country-select">COUNTRY:</label>
                 <select id="country-select" class="select">
-                    <option value="NO">🇳🇴 Norway</option>
-                    <option value="SE">🇸🇪 Sweden</option>
-                    <option value="DK">🇩🇰 Denmark</option>
-                    <option value="FI">🇫🇮 Finland</option>
+                    <option value="NO">🇳🇴 NORWAY</option>
+                    <option value="SE">🇸🇪 SWEDEN</option>
+                    <option value="DK">🇩🇰 DENMARK</option>
+                    <option value="FI">🇫🇮 FINLAND</option>
                 </select>
             </div>
             
             <div class="control-group">
-                <label for="airport-select">Airport:</label>
+                <label for="airport-select">AIRPORT:</label>
                 <select id="airport-select" class="select">
-                    <option value="OSL">OSL - Oslo Gardermoen</option>
+                    <option value="OSL">OSL - OSLO GARDERMOEN</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <button id="refresh-btn" class="btn">🔄 Refresh Now</button>
+                <button id="refresh-btn" class="btn">🔄 REFRESH</button>
             </div>
 
             <div class="status-indicator">
-                <span id="status-text">Connecting...</span>
+                <span id="status-text">CONNECTING...</span>
                 <span id="last-update"></span>
             </div>
         </div>
 
-        <!-- Info Bar -->
-        <div class="info-bar">
-            <div class="info-item">
-                <span class="info-label">Airport:</span>
-                <span id="current-airport" class="info-value">-</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Flights:</span>
-                <span id="flight-count" class="info-value">0</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Auto-refresh:</span>
-                <span class="info-value">60s</span>
-            </div>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="departures">DEPARTURES</button>
+            <button class="tab-btn" data-tab="arrivals">ARRIVALS</button>
         </div>
 
         <!-- Flights Display -->
         <div class="flights-container">
             <div id="loading" class="loading">
                 <div class="spinner"></div>
-                <p>Loading flight data...</p>
+                <p>LOADING FLIGHT DATA...</p>
             </div>
             
             <div id="error" class="error" style="display: none;">
                 <p class="error-icon">⚠️</p>
-                <p id="error-message">Failed to load flight data</p>
-                <button id="retry-btn" class="btn">Retry</button>
+                <p id="error-message">FAILED TO LOAD FLIGHT DATA</p>
+                <button id="retry-btn" class="btn">RETRY</button>
             </div>
 
-            <div id="flights-grid" class="flights-grid">
-                <!-- Flights will be populated here -->
+            <!-- Departures Table -->
+            <div id="departures-view" class="flight-view">
+                <table class="flight-table">
+                    <thead>
+                        <tr>
+                            <th>TIME</th>
+                            <th>FLIGHT</th>
+                            <th>DESTINATION</th>
+                            <th>GATE</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="departures-tbody">
+                        <!-- Departures will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Arrivals Table -->
+            <div id="arrivals-view" class="flight-view" style="display: none;">
+                <table class="flight-table">
+                    <thead>
+                        <tr>
+                            <th>TIME</th>
+                            <th>FLIGHT</th>
+                            <th>ORIGIN</th>
+                            <th>GATE</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="arrivals-tbody">
+                        <!-- Arrivals will be populated here -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Footer -->
         <footer class="footer">
-            <p>Data provided by OpenSky Network | Updates every 60 seconds</p>
-            <p class="footer-small">Real-time aircraft position data from worldwide ADS-B receivers</p>
+            <p>DATA PROVIDED BY OPENSKY NETWORK | AUTO-REFRESH EVERY 120 SECONDS</p>
         </footer>
     </div>
 

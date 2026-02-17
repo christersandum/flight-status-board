@@ -1,10 +1,12 @@
-// Flight Status Board Application
+// Flight Information Display System
 class FlightStatusBoard {
     constructor() {
         this.api = new FlightAPI();
         this.currentAirport = 'OSL';
         this.currentCountry = 'NO';
+        this.currentTab = 'departures';
         this.refreshInterval = null;
+        this.clockInterval = null;
         this.countries = [];
         this.airports = {};
         
@@ -21,12 +23,16 @@ class FlightStatusBoard {
             retryBtn: document.getElementById('retry-btn'),
             statusText: document.getElementById('status-text'),
             lastUpdate: document.getElementById('last-update'),
-            currentAirport: document.getElementById('current-airport'),
-            flightCount: document.getElementById('flight-count'),
+            airportName: document.getElementById('airport-name'),
+            digitalClock: document.getElementById('digital-clock'),
             loading: document.getElementById('loading'),
             error: document.getElementById('error'),
             errorMessage: document.getElementById('error-message'),
-            flightsGrid: document.getElementById('flights-grid')
+            departuresView: document.getElementById('departures-view'),
+            arrivalsView: document.getElementById('arrivals-view'),
+            departuresTbody: document.getElementById('departures-tbody'),
+            arrivalsTbody: document.getElementById('arrivals-tbody'),
+            tabBtns: document.querySelectorAll('.tab-btn')
         };
     }
 
@@ -35,10 +41,17 @@ class FlightStatusBoard {
         this.elements.airportSelect.addEventListener('change', () => this.onAirportChange());
         this.elements.refreshBtn.addEventListener('click', () => this.refreshFlights());
         this.elements.retryBtn.addEventListener('click', () => this.refreshFlights());
+        
+        this.elements.tabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+        });
     }
 
     async initialize() {
         try {
+            // Start the digital clock
+            this.startClock();
+            
             // Load countries
             this.countries = await this.api.fetchCountries();
             
@@ -54,12 +67,50 @@ class FlightStatusBoard {
             // Load initial flights
             await this.refreshFlights();
             
-            // Start auto-refresh
+            // Start auto-refresh (120 seconds)
             this.startAutoRefresh();
             
         } catch (error) {
-            this.showError('Failed to initialize application: ' + error.message);
+            this.showError('FAILED TO INITIALIZE APPLICATION: ' + error.message);
         }
+    }
+
+    startClock() {
+        const updateClock = () => {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            this.elements.digitalClock.textContent = `${hours}:${minutes}:${seconds}`;
+        };
+        
+        updateClock();
+        this.clockInterval = setInterval(updateClock, 1000);
+    }
+
+    switchTab(tab) {
+        this.currentTab = tab;
+        
+        // Update tab buttons
+        this.elements.tabBtns.forEach(btn => {
+            if (btn.dataset.tab === tab) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Show/hide views
+        if (tab === 'departures') {
+            this.elements.departuresView.style.display = 'block';
+            this.elements.arrivalsView.style.display = 'none';
+        } else {
+            this.elements.departuresView.style.display = 'none';
+            this.elements.arrivalsView.style.display = 'block';
+        }
+        
+        // Refresh data for the active tab
+        this.refreshFlights();
     }
 
     onCountryChange() {
@@ -75,17 +126,23 @@ class FlightStatusBoard {
         airports.forEach(airport => {
             const option = document.createElement('option');
             option.value = airport.code;
-            option.textContent = `${airport.code} - ${airport.name}`;
+            option.textContent = `${airport.code} - ${this.formatAirportName(airport.name)}`;
             this.elements.airportSelect.appendChild(option);
         });
 
         if (airports.length > 0) {
             this.currentAirport = airports[0].code;
+            this.elements.airportName.textContent = this.formatAirportName(airports[0].name);
         }
     }
 
     onAirportChange() {
         this.currentAirport = this.elements.airportSelect.value;
+        const airports = this.airports[this.currentCountry] || [];
+        const airport = airports.find(a => a.code === this.currentAirport);
+        if (airport) {
+            this.elements.airportName.textContent = this.formatAirportName(airport.name);
+        }
         this.refreshFlights();
     }
 
@@ -93,126 +150,142 @@ class FlightStatusBoard {
         try {
             this.showLoading();
             
-            const data = await this.api.fetchFlights(this.currentAirport);
+            if (this.currentTab === 'departures') {
+                const data = await this.api.fetchDepartures(this.currentAirport);
+                this.displayDepartures(data);
+            } else {
+                const data = await this.api.fetchArrivals(this.currentAirport);
+                this.displayArrivals(data);
+            }
             
-            this.displayFlights(data);
-            this.updateStatus('Connected', data.timestamp);
+            this.updateStatus('CONNECTED', new Date().toISOString());
             this.hideLoading();
             
         } catch (error) {
-            this.showError('Failed to load flight data: ' + error.message);
-            this.updateStatus('Error', null);
+            this.showError('FAILED TO LOAD FLIGHT DATA: ' + error.message);
+            this.updateStatus('ERROR', null);
         }
     }
 
-    displayFlights(data) {
-        const { airport, flights, count } = data;
+    displayDepartures(data) {
+        const { flights } = data;
         
-        // Update info
-        this.elements.currentAirport.textContent = `${airport.code} - ${airport.name}`;
-        this.elements.flightCount.textContent = count || 0;
-
-        // Clear grid
-        this.elements.flightsGrid.innerHTML = '';
+        // Clear table
+        this.elements.departuresTbody.innerHTML = '';
 
         if (!flights || flights.length === 0) {
-            this.elements.flightsGrid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px; opacity: 0.7;">
-                    <p style="font-size: 1.5rem; margin-bottom: 10px;">✈️</p>
-                    <p>No flights detected in the ${airport.code} area</p>
-                    <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">
-                        Try another airport or wait for aircraft to enter the monitoring zone
-                    </p>
-                </div>
+            this.elements.departuresTbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <div class="empty-state-icon">✈️</div>
+                        <div class="empty-state-text">NO DEPARTURES FOUND</div>
+                        <div class="empty-state-subtext">No departures in the last 2 hours</div>
+                    </td>
+                </tr>
             `;
             return;
         }
 
         // Display flights
         flights.forEach(flight => {
-            const card = this.createFlightCard(flight);
-            this.elements.flightsGrid.appendChild(card);
+            const row = this.createDepartureRow(flight);
+            this.elements.departuresTbody.appendChild(row);
         });
     }
 
-    createFlightCard(flight) {
-        const card = document.createElement('div');
-        card.className = 'flight-card';
-
-        const statusClass = `status-${flight.status.toLowerCase().replace(' ', '-')}`;
+    displayArrivals(data) {
+        const { flights } = data;
         
-        card.innerHTML = `
-            <div class="flight-header">
-                <div>
-                    <div class="flight-callsign">${this.escapeHtml(flight.callsign)}</div>
-                    <div class="flight-airline">Airline: ${this.escapeHtml(flight.airline)}</div>
-                </div>
-                <div class="flight-status ${statusClass}">
-                    ${this.escapeHtml(flight.status)}
-                </div>
-            </div>
-            <div class="flight-details">
-                <div class="flight-detail">
-                    <span class="detail-label">ICAO24:</span>
-                    <span class="detail-value">${this.escapeHtml(flight.icao24)}</span>
-                </div>
-                <div class="flight-detail">
-                    <span class="detail-label">Country:</span>
-                    <span class="detail-value">${this.escapeHtml(flight.originCountry)}</span>
-                </div>
-                <div class="flight-detail">
-                    <span class="detail-label">Altitude:</span>
-                    <span class="detail-value">${flight.altitude} m</span>
-                </div>
-                <div class="flight-detail">
-                    <span class="detail-label">Velocity:</span>
-                    <span class="detail-value">${flight.velocity} km/h</span>
-                </div>
-                <div class="flight-detail">
-                    <span class="detail-label">Heading:</span>
-                    <span class="detail-value">${flight.heading}°</span>
-                </div>
-                <div class="flight-detail">
-                    <span class="detail-label">Vertical Rate:</span>
-                    <span class="detail-value">${flight.verticalRate} m/s</span>
-                </div>
-                <div class="flight-detail">
-                    <span class="detail-label">Position:</span>
-                    <span class="detail-value">${flight.latitude?.toFixed(4)}, ${flight.longitude?.toFixed(4)}</span>
-                </div>
-                <div class="flight-detail">
-                    <span class="detail-label">Last Contact:</span>
-                    <span class="detail-value">${this.formatTime(flight.lastContact)}</span>
-                </div>
-            </div>
-        `;
+        // Clear table
+        this.elements.arrivalsTbody.innerHTML = '';
 
-        return card;
+        if (!flights || flights.length === 0) {
+            this.elements.arrivalsTbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <div class="empty-state-icon">✈️</div>
+                        <div class="empty-state-text">NO ARRIVALS FOUND</div>
+                        <div class="empty-state-subtext">No arrivals in the last 2 hours</div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Display flights
+        flights.forEach(flight => {
+            const row = this.createArrivalRow(flight);
+            this.elements.arrivalsTbody.appendChild(row);
+        });
+    }
+
+    createDepartureRow(flight) {
+        const row = document.createElement('tr');
+        
+        const time = this.formatTime(flight.firstSeen);
+        const statusClass = this.getStatusClass(flight.status);
+        
+        row.innerHTML = `
+            <td>${time}</td>
+            <td>${this.escapeHtml(flight.callsign)}</td>
+            <td>${this.escapeHtml(flight.estArrivalAirportName)}</td>
+            <td>${this.escapeHtml(flight.gate)}</td>
+            <td><span class="status-badge ${statusClass}">${this.escapeHtml(flight.status)}</span></td>
+        `;
+        
+        return row;
+    }
+
+    createArrivalRow(flight) {
+        const row = document.createElement('tr');
+        
+        const time = this.formatTime(flight.lastSeen);
+        const statusClass = this.getStatusClass(flight.status);
+        
+        row.innerHTML = `
+            <td>${time}</td>
+            <td>${this.escapeHtml(flight.callsign)}</td>
+            <td>${this.escapeHtml(flight.estDepartureAirportName)}</td>
+            <td>${this.escapeHtml(flight.gate)}</td>
+            <td><span class="status-badge ${statusClass}">${this.escapeHtml(flight.status)}</span></td>
+        `;
+        
+        return row;
+    }
+
+    getStatusClass(status) {
+        return 'status-' + status.toLowerCase().replace(/\s+/g, '-');
     }
 
     showLoading() {
         this.elements.loading.style.display = 'block';
         this.elements.error.style.display = 'none';
-        this.elements.flightsGrid.style.display = 'none';
+        this.elements.departuresView.style.display = 'none';
+        this.elements.arrivalsView.style.display = 'none';
     }
 
     hideLoading() {
         this.elements.loading.style.display = 'none';
-        this.elements.flightsGrid.style.display = 'grid';
+        if (this.currentTab === 'departures') {
+            this.elements.departuresView.style.display = 'block';
+        } else {
+            this.elements.arrivalsView.style.display = 'block';
+        }
     }
 
     showError(message) {
         this.elements.error.style.display = 'block';
         this.elements.errorMessage.textContent = message;
         this.elements.loading.style.display = 'none';
-        this.elements.flightsGrid.style.display = 'none';
+        this.elements.departuresView.style.display = 'none';
+        this.elements.arrivalsView.style.display = 'none';
     }
 
     updateStatus(status, timestamp) {
         this.elements.statusText.textContent = status;
         if (timestamp) {
             const time = new Date(timestamp).toLocaleTimeString();
-            this.elements.lastUpdate.textContent = `Last update: ${time}`;
+            this.elements.lastUpdate.textContent = `LAST UPDATE: ${time}`;
         }
     }
 
@@ -222,21 +295,29 @@ class FlightStatusBoard {
             clearInterval(this.refreshInterval);
         }
         
-        // Refresh every 60 seconds
+        // Refresh every 120 seconds
         this.refreshInterval = setInterval(() => {
             this.refreshFlights();
-        }, 60000);
+        }, 120000);
     }
 
     formatTime(timestamp) {
-        const date = new Date(timestamp);
-        return date.toLocaleTimeString();
+        if (!timestamp) return '--:--';
+        const date = new Date(timestamp * 1000);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
     }
 
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    formatAirportName(name) {
+        return (name || '').toUpperCase();
     }
 }
 
