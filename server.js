@@ -577,9 +577,22 @@ app.get('/api/flights', async (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Flight Status Board server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Access the application at http://localhost:${PORT}`);
-});
+// Export for testing
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Flight Status Board server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Access the application at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = { 
+  app, 
+  AIRPORTS, 
+  COUNTRIES, 
+  AIRPORT_NAMES, 
+  getAirportName, 
+  generateGate, 
+  getDepartureStatus, 
+  getArrivalStatus 
+};
