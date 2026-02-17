@@ -202,7 +202,7 @@ describe('Data Validation Tests', () => {
 
     it('getArrivalStatus returns "On Approach" for flights arriving soon (< 30 min)', () => {
       const now = Math.floor(Date.now() / 1000);
-      const lastSeen = now + 1000; // 16 minutes from now
+      const lastSeen = now + 1000; // ~17 minutes from now
       const status = getArrivalStatus(now - 3600, lastSeen);
       expect(status).toBe('On Approach');
     });
