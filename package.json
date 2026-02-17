@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "jest --verbose --forceExit"
   },
   "keywords": [
     "flight",
@@ -21,7 +22,22 @@
     "axios": "^1.13.5",
     "cors": "^2.8.5"
   },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
   "engines": {
     "node": ">=14.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "server.js",
+      "public/js/**/*.js"
+    ]
   }
 }
